@@ -1,5 +1,8 @@
-# pyson
-A json like more powerful object notation for python
+# PySON
+A JSON like more powerful notation for python
 
-## introduction
-pyson is a json like object notation for python.
+## Introduction
+PySON is a JSON like object notation for python. Besides the usual use of the JSON, the python object and the function call can be represented with PySON which can be dynamically parsed into the python object at the running time.
+
+
+
