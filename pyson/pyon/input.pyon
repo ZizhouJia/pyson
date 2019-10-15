@@ -1,0 +1,20 @@
+{
+    key1:{
+        key2_123:[1,2.3,-1,-3e-1,{
+            key3:1.2,
+            key004:"how are you"},
+            import@torch.nn.Conv2d{
+                variable:1,variable2:2,variabe3:good@obj323.ajkdf.sfds{input1:1,input2:{a:1,b:2}}},
+            self@torch.nn.Conv2d(3,16)]
+    },
+    key4:{
+        //this is zhushi
+        //中文
+        /*中文*/
+        great:None,
+        bad:False
+    }
+}
+
+
+

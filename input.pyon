@@ -1,0 +1,4 @@
+{
+    path:"checker.py",
+    exist:import@os.path.exists(self@path)
+}

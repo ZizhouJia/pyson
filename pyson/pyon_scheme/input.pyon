@@ -1,0 +1,33 @@
+/*{
+    key1:{
+        key2_123:[1,2.3,-1,-3e-1,{
+            key3:1.2,
+            key004:"how are you"},
+            import@torch.nn.Conv2d{
+                variable:1,variable2:2,variabe3:good@obj323.ajkdf.sfds(1,2.3,{a:1,b:2})},
+            self@torch.nn.Conv2d()]
+    },
+    key4:{
+        //this is zhushi
+        //中文
+        great:None,
+        bad:False
+    }
+}*/
+
+
+
+@bababa.fsdf.aadf{
+    key1:{
+        key2_123:#list{element:[#float{min:1,max:2},#int,-3.14159]},
+        key3_123:#enum_object{enumerate:[default@surface.1,@bingo.zachangzi,true,false,none,-1e-3]},
+        key4_123:#float{max:1,min:-0.1},
+        key5:#object{scope:"import@future.*"},
+        key6:{
+            great:#object{scope:big@bang}
+        }
+    }
+}
+
+
+
