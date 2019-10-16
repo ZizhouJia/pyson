@@ -17,6 +17,15 @@ class pyonSchemeListener(ParseTreeListener):
         pass
 
 
+    # Enter a parse tree produced by pyonSchemeParser#checker_dicts.
+    def enterChecker_dicts(self, ctx:pyonSchemeParser.Checker_dictsContext):
+        pass
+
+    # Exit a parse tree produced by pyonSchemeParser#checker_dicts.
+    def exitChecker_dicts(self, ctx:pyonSchemeParser.Checker_dictsContext):
+        pass
+
+
     # Enter a parse tree produced by pyonSchemeParser#checker_dict.
     def enterChecker_dict(self, ctx:pyonSchemeParser.Checker_dictContext):
         pass

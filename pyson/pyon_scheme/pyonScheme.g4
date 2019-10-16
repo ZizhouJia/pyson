@@ -24,7 +24,8 @@ LINE_COMMENT  : '//' .*? '\r'? '\n' -> skip ;
 COMMENT       : '/*' .*? '*/' ->skip ; 
 WS : [ \t\r\n]+ -> skip ;
 
-entry_point:OBJECT checker_dict;
+entry_point: checker_dicts;
+checker_dicts: OBJECT checker_dict checker_dicts|;
 checker_dict:LEFT_DICT items RIGHT_DICT;
 items: item other_items|; 
 other_items: COLON item other_items|;

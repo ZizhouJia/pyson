@@ -1,4 +1,4 @@
-# Generated from pyon.g4 by ANTLR 4.7.2
+# Generated from pyson.g4 by ANTLR 4.7.2
 from antlr4 import *
 from io import StringIO
 from typing.io import TextIO
@@ -142,7 +142,7 @@ def serializedATN():
         return buf.getvalue()
 
 
-class pyonLexer(Lexer):
+class pysonLexer(Lexer):
 
     atn = ATNDeserializer().deserialize(serializedATN())
 
@@ -188,7 +188,7 @@ class pyonLexer(Lexer):
                   "LEFT_BUKKET", "RIGHT_BUKKEFT", "LINE_COMMENT", "COMMENT", 
                   "WS" ]
 
-    grammarFileName = "pyon.g4"
+    grammarFileName = "pyson.g4"
 
     def __init__(self, input=None, output:TextIO = sys.stdout):
         super().__init__(input, output)

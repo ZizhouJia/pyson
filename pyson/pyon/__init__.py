@@ -1,3 +1,3 @@
-from . import pyonLexer
-from . import pyonParser
-from . import pyonListener
+from . import pysonLexer
+from . import pysonParser
+from . import pysonListener

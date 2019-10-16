@@ -146,44 +146,56 @@ class transformer(object):
             raise RuntimeError("The params for object "+pyon_object[0]+" is wrong")
 
 
-    def transfrom(self,pyon_dict):
-        root_store={}
-        current_store=root_store
-        self._transform_dict(pyon_dict,current_store,root_store)
-        return root_store
-        
+    def transfrom(self,pyon_obj):
+        if(isinstance(pyon_obj,dict)):
+            root_store={}
+            current_store=root_store
+            self._transform_dict(pyon_obj,current_store,root_store)
+            return root_store
+        if(isinstance(pyon_obj,list)):
+            root_store=[]
+            current_store=root_store
+            self._transform_list(pyon_obj,current_store,root_store)
+            return root_store
+        else:
+            return None
+
+            
 
 reg=regist.reg
 trans=transformer(reg)
 
 def from_file(file_name):
     input=FileStream(file_name,encoding='utf-8')
-    lexer=pyon.pyonLexer.pyonLexer(input)
+    lexer=pyon.pysonLexer.pysonLexer(input)
     token_stream=CommonTokenStream(lexer)
-    parser=pyon.pyonParser.pyonParser(token_stream)
+    parser=pyon.pysonParser.pysonParser(token_stream)
     tree=parser.entry_point()
-    listener=pyon.pyonListener.pyonListener()
+    listener=pyon.pysonListener.pysonListener()
     # tree_str=tree.toStringTree(recog=parser)
     walker=ParseTreeWalker()
     walker.walk(listener,tree)
-    d=listener.global_dict
+    d=listener.return_value
     result=trans.transfrom(d)
     return result
 
 def from_string(pyson_string):
     input=InputStream(pyson_string)
-    lexer=pyon.pyonLexer.pyonLexer(input)
+    lexer=pyon.pysonLexer.pysonLexer(input)
     token_stream=CommonTokenStream(lexer)
-    parser=pyon.pyonParser.pyonParser(token_stream)
+    parser=pyon.pysonParser.pysonParser(token_stream)
     tree=parser.entry_point()
-    listener=pyon.pyonListener.pyonListener()
+    listener=pyon.pysonListener.pysonListener()
     walker=ParseTreeWalker()
     walker.walk(listener,tree)
-    d=listener.global_dict
+    d=listener.return_value
     result=trans.transfrom(d)
     return result
 
-def to_object(pyson_dict):
-    return obj(pyson_dict)
+def to_object(pyson_obj):
+    obj_dict={}
+    obj_dict["pyson_obj"]=pyson_obj
+    python_obj=obj(obj_dict)
+    return python_obj.pyson_obj
 
 

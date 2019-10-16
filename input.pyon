@@ -1,4 +1,7 @@
-{
+/*{
     path:"checker.py",
     exist:import@os.path.exists(self@path)
-}
+}*/
+
+
+[1,2,3,"very good"]

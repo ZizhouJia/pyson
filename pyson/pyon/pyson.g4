@@ -1,4 +1,4 @@
-grammar pyon;
+grammar pyson;
 INT:[+-]?[0-9]+;
 FLOAT:[-+]?([0-9]+('.'[0-9]*)?|'.'[0-9]+)([eE][-+]?[0-9]+)?;
 TRUE: 'True'|'true';
@@ -21,7 +21,7 @@ RIGHT_BUKKEFT:')';
 LINE_COMMENT  : '//' .*? '\r'? '\n' -> skip ;
 COMMENT       : '/*' .*? '*/' ->skip ; 
 WS : [ \t\r\n]+ -> skip ;
-entry_point: item_dict;
+entry_point: item_dict|item_list;
 item_dict: LEFT_DICT items RIGHT_DICT;
 items: item other_items|; 
 other_items: COLON item other_items|;
