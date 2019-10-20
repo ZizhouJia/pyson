@@ -99,6 +99,9 @@ class pysonListener(ParseTreeListener):
         if(ctx.STRING() is not None):
             ctx.return_value=str(ctx.STRING())[1:-1]
             return
+        if(ctx.CTX() is not None):
+            ctx.return_value=("ctx",None)
+            return
         if(ctx.item_dict() is not None):
             ctx.return_value=ctx.item_dict().return_value
             return

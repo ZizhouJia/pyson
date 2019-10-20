@@ -11,39 +11,71 @@ def intable(content):
         return False
 
 
+def obj_creater(pyson_dict,root_object=None,root_dict_id=None):
+    if(root_dict_id==id(pyson_dict)):
+        return root_object
+    if(root_dict_id is None):
+        root_dict_id=id(pyson_dict)
+    if(isinstance(pyson_dict,list)):
+        return_list=[]
+        if(root_object is None):
+            root_object=return_list
+        for i in range(0,len(pyson_dict)):
+            return_list.append(obj_creater(pyson_dict[i],root_object,root_dict_id))
+        return return_list
+    if(isinstance(pyson_dict,dict)):
+        current_obj=obj()
+        if(root_object is None):
+            root_object=current_obj
+        current_obj.init(pyson_dict,current_obj,root_dict_id)
+        return current_obj
+    return pyson_dict
+
+
 class obj(object):
-    def __init__(self, d):
+    def __init__(self):
+        pass
+
+    def init(self, d,root_object=None,root_dict_id=None):
         for a, b in d.items():
-            if isinstance(b, (list, tuple)):
-               setattr(self, a, [obj(x) if isinstance(x, dict) else x for x in b])
-            else:
-               setattr(self, a, obj(b) if isinstance(b, dict) else b)
-    
+            setattr(self, a,obj_creater(b,root_object,root_dict_id))
         
-    def _extract_obj_string(self,prefix,value,stored_dict):
+    def _extract_obj_string(self,prefix,value,stored_dict,root_id=None):
+        if(root_id==id(value)):
+            stored_dict[prefix]=("ctx","ctx")
+            return
+        if(root_id is None):
+            root_id=id(self)
         if(value is None):
-            stored_dict[prefix]=("None","None")
+            stored_dict[prefix]=None
             return
         if(isinstance(value,obj)):
             for key,v in vars(value).items():
-                self._extract_obj_string(prefix+"."+str(key),v,stored_dict)
+                self._extract_obj_string(prefix+"."+str(key),v,stored_dict,root_id)
             return
         if(isinstance(value,list)):
             for i in range(0,len(value)):
-                self._extract_obj_string(prefix+"."+str(i+1),value[i],stored_dict)
+                self._extract_obj_string(prefix+"["+str(i+1)+"]",value[i],stored_dict,root_id)
             return
-        stored_dict[prefix]=(type(value),str(value))
+        if(isinstance(value,(int,float,bool,str))):
+            stored_dict[prefix]=value
+        else:
+            stored_dict[prefix]=(type(value),str(value))
 
     def __str__(self):
         stored_dict={}
         output_string=""
-        for key,value in vars(self).items():
-            self._extract_obj_string(key,value,stored_dict)
+        self._extract_obj_string("self",self,stored_dict)
         for key,value in stored_dict.items():
             output_string+=key
-            output_string+=":("
-            output_string+=str(value[0])+","+value[1]+")\n"
+            if(isinstance(value,tuple)):
+                output_string+=": ("
+                output_string+=str(value[0])+","+str(value[1])+")\n"
+            else:
+                output_string+=": "+str(value)
+                output_string+="\n"
         return output_string
+    
 
 
 class transformer(object):
@@ -79,6 +111,9 @@ class transformer(object):
             if(isinstance(pyon_object[i],(int,float,bool,str))):
                 current_store.append(pyon_object[i])
                 continue
+            if(pyon_object[i] is None):
+                current_store.append(None)
+                continue
             if(isinstance(pyon_object[i],tuple)):
                 store=[]
                 self._transform_object(pyon_object[i],store,root_store)
@@ -99,6 +134,9 @@ class transformer(object):
         for key,value in pyon_object.items():
             if(isinstance(pyon_object[key],(int,float,bool,str))):
                 current_store[key]=value
+                continue
+            if(pyon_object[key] is None):
+                current_store[key]=None
                 continue
             if(isinstance(pyon_object[key],tuple)):
                 store=[]
@@ -192,10 +230,7 @@ def from_string(pyson_string):
     result=trans.transfrom(d)
     return result
 
-def to_object(pyson_obj):
-    obj_dict={}
-    obj_dict["pyson_obj"]=pyson_obj
-    python_obj=obj(obj_dict)
-    return python_obj.pyson_obj
+def to_object(pyson_dict):
+    return obj_creater(pyson_dict)
 
 
