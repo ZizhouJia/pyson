@@ -30,10 +30,9 @@ class register(object):
         except:
             return None
         
-    def get_object(self,object_name):
-        scope,name=object_name_utils.split_scope_name(object_name)
+    def get_object(self,object_name,scope):
         if(scope=="import"):
-            scope,others=object_name_utils.parse_object_name(object_name)
+            others=object_name.split('.')
             package=self._load_package(others)
             if(package is None):
                 return None
@@ -41,9 +40,9 @@ class register(object):
             
         if(scope not in self.regist_object.keys()):
             return None
-        if(name not in self.regist_object[scope].keys()):
+        if(object_name not in self.regist_object[scope].keys()):
             return None
-        return self.regist_object[scope][name]
+        return self.regist_object[scope][object_name]
 
 class object_name_utils(object):
     @staticmethod

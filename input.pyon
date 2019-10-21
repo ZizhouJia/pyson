@@ -3,4 +3,4 @@
     exist:import@os.path.exists(self@0.path),
     list:[1,2,import@os.path],
     context:ctx
-}]
+}, #os.path]

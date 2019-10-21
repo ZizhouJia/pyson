@@ -6,6 +6,7 @@ else:
     from pysonParser import pysonParser
 
 from collections import OrderedDict
+from . import pyson_object
 
 # This class defines a complete listener for a parse tree produced by pysonParser.
 class pysonListener(ParseTreeListener):
@@ -100,7 +101,14 @@ class pysonListener(ParseTreeListener):
             ctx.return_value=str(ctx.STRING())[1:-1]
             return
         if(ctx.CTX() is not None):
-            ctx.return_value=("ctx",None)
+            ctx.return_value=pyson_object.pyson_object("ctx",None)
+            return
+        if(ctx.OBJECT_NAME() is not None):
+            text=str(ctx.OBJECT_NAME().getText())
+            text=text.split('#')
+            if(len(text[0])==0):
+                text[0]="default"
+            ctx.return_value=pyson_object.pyson_name(text[1],text[0])
             return
         if(ctx.item_dict() is not None):
             ctx.return_value=ctx.item_dict().return_value
@@ -169,12 +177,13 @@ class pysonListener(ParseTreeListener):
     # Exit a parse tree produced by pysonParser#item_object.
     def exitItem_object(self, ctx:pysonParser.Item_objectContext):
         object_name=ctx.OBJECT().getText()
+        object_name=object_name.split('@')
+        if(len(object_name[0])==0):
+            object_name[0]="default"
         if(ctx.item_dict() is not None):
-            ctx.return_value=(object_name,ctx.item_dict().return_value)
+            ctx.return_value=pyson_object.pyson_object(object_name[1],object_name[0],ctx.item_dict().return_value)
             return
         if(ctx.item_tuple() is not None):
-            ctx.return_value=(object_name,ctx.item_tuple().return_value)
+            ctx.return_value=pyson_object.pyson_object(object_name[1],object_name[0],ctx.item_tuple().return_value)
             return
-        ctx.return_value=(object_name,None)
-
-
+        ctx.return_value=pyson_object.pyson_object(object_name[1],object_name[0],None)
