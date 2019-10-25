@@ -44,6 +44,7 @@ class register(object):
             return None
         return self.regist_object[scope][object_name]
 
+
 class object_name_utils(object):
     @staticmethod
     def split_scope_name(object_name):

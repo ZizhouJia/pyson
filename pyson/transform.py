@@ -3,6 +3,12 @@ from . import pyson
 from antlr4 import *
 
 
+#The translated pyson object contain two element,The first one is origin element and the second one is the translated element
+#The origin object and the corresponding checker pass to the function call the function first check the origin object and call the function to build the traslated element 
+#after the translated element is build it call the checker to check the value and return the translated element
+#For the dict checker the dict type check is also called and then call the transform dict and then call the value check 
+#In detail for a function, First call the current function check method and then call the function object generate method, then call the function object check method
+
 def intable(content):
     try:
         int(content)
@@ -91,6 +97,8 @@ class transformer(object):
             for i in range(0,len(object_name)):
                 if(intable(object_name[i])):
                     if(isinstance(current_node,list)):
+                        if(int(object_name[i])>=len(current_node)):
+                            return None
                         current_node=current_node[int(object_name[i])]
                         continue
                     else:
