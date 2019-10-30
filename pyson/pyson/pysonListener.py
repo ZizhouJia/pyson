@@ -13,6 +13,13 @@ class pysonListener(ParseTreeListener):
     def __init__(self):
         super(pysonListener,self).__init__()
         self.return_value=None
+        self._element_number=0
+    
+    def set_value(self,value_type,value,token):
+        cont=pyson_object.content(value_type,type,self._element_number,token.getLine(),token.getCharPositionInLine())
+        self._element_number+=1
+        return cont
+        
 
     # Enter a parse tree produced by pysonParser#entry_point.
     def enterEntry_point(self, ctx:pysonParser.Entry_pointContext):
@@ -34,7 +41,7 @@ class pysonListener(ParseTreeListener):
 
     # Exit a parse tree produced by pysonParser#item_dict.
     def exitItem_dict(self, ctx:pysonParser.Item_dictContext):
-        ctx.return_value=ctx.items().return_value
+        ctx.return_value=ctx.return_value=self.set_value(list,ctx.items().return_value,ctx.values())
 
 
     # Enter a parse tree produced by pysonParser#items.
@@ -83,32 +90,40 @@ class pysonListener(ParseTreeListener):
     # Exit a parse tree produced by pysonParser#value.
     def exitValue(self, ctx:pysonParser.ValueContext):
         if(ctx.TRUE() is not None):
-            ctx.return_value=True
+            token=ctx.TRUE()
+            ctx.return_value=self.set_value(bool,True,token)
             return
         if(ctx.FALSE() is not None):
-            ctx.return_value=False
+            token=ctx.FALSE()
+            ctx.return_value=self.set_value(bool,False,token)
             return
         if(ctx.NONE() is not None):
-            ctx.return_value=None
+            token=ctx.NONE()
+            ctx.return_value=self.set_value(None,None,token)
             return
         if(ctx.INT() is not None):
-            ctx.return_value=int(str(ctx.INT().getText()))
+            token=ctx.INT()
+            ctx.return_value=self.set_value(int,int(str(ctx.INT().getText())),token)
             return
         if(ctx.FLOAT() is not None):
-            ctx.return_value=float(str(ctx.FLOAT().getText()))
+            token=ctx.FLOAT()
+            ctx.return_value=self.set_value(float,float(str(ctx.FLOAT().getText())),token)
             return
         if(ctx.STRING() is not None):
-            ctx.return_value=str(ctx.STRING())[1:-1]
+            token=ctx.STRING()
+            ctx.return_value=self.set_value(str,str(ctx.STRING())[1:-1],token)
             return
         if(ctx.CTX() is not None):
-            ctx.return_value=pyson_object.pyson_object("ctx",None)
+            token=ctx.STRING()
+            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object("ctx",None),token)
             return
         if(ctx.OBJECT_NAME() is not None):
-            text=str(ctx.OBJECT_NAME().getText())
+            token=ctx.STRING()
+            text=str(token.getText())
             text=text.split('#')
             if(len(text[0])==0):
                 text[0]="default"
-            ctx.return_value=pyson_object.pyson_name(text[1],text[0])
+            ctx.return_value=self.set_value(pyson_object.pyson_name,pyson_object.pyson_name(text[1],text[0]),token)
             return
         if(ctx.item_dict() is not None):
             ctx.return_value=ctx.item_dict().return_value
@@ -158,7 +173,7 @@ class pysonListener(ParseTreeListener):
 
     # Exit a parse tree produced by pysonParser#item_list.
     def exitItem_list(self, ctx:pysonParser.Item_listContext):
-        ctx.return_value=ctx.values().return_value
+        ctx.return_value=ctx.return_value=self.set_value(list,ctx.values().return_value,ctx.values())
 
 
     # Enter a parse tree produced by pysonParser#item_tuple.
@@ -167,9 +182,8 @@ class pysonListener(ParseTreeListener):
 
     # Exit a parse tree produced by pysonParser#item_tuple.
     def exitItem_tuple(self, ctx:pysonParser.Item_tupleContext):
-        ctx.return_value=ctx.values().return_value
-
-
+        ctx.return_value=ctx.return_value=self.set_value(list,ctx.values().return_value,ctx.values())
+       
     # Enter a parse tree produced by pysonParser#item_object.
     def enterItem_object(self, ctx:pysonParser.Item_objectContext):
         pass
@@ -181,9 +195,9 @@ class pysonListener(ParseTreeListener):
         if(len(object_name[0])==0):
             object_name[0]="default"
         if(ctx.item_dict() is not None):
-            ctx.return_value=pyson_object.pyson_object(object_name[1],object_name[0],ctx.item_dict().return_value)
+            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(object_name[1],object_name[0],ctx.item_dict().return_value.value),ctx.item_dict())
             return
         if(ctx.item_tuple() is not None):
-            ctx.return_value=pyson_object.pyson_object(object_name[1],object_name[0],ctx.item_tuple().return_value)
+            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(object_name[1],object_name[0],ctx.item_tuple().return_value.value),ctx.item_tuple())
             return
-        ctx.return_value=pyson_object.pyson_object(object_name[1],object_name[0],None)
+        

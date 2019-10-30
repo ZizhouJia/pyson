@@ -1,0 +1,107 @@
+[
+    //The checker@int scheme
+    {
+        name:"int",
+        scheme:checker@dict({
+            min_value:checker@int(),
+            max_value:checker@int(),
+            defualt:checker@int{
+                allow_none:True
+            },
+            allow_none:checker@bool()
+        },
+        ["min_value","max_value","defualt"])
+    },
+    //The checker@float scheme
+    {
+        name:"float",
+        scheme:checker@dict({
+            min_value:checker@float(),
+            max_value:checker@float(),
+            defualt:checker@float{
+                allow_none:True
+            },
+            allow_none:checker@bool()
+        },["min_value","max_value","defualt"])
+    },
+    //The checker string scheme
+    {
+        name:"string",
+        scheme:checker@dict({
+            pattern:checker@string(),
+            default:checker@string{
+                allow_none:True
+            },
+            allow_none:checker@bool()
+        },["pattern","defualt","allow_none"])
+    },
+    //The checker bool scheme
+    {
+        name:"bool",
+        scheme:checker@dict({
+            defualt:checker@string{
+                allow_none:True
+            },
+            allow_none:checker@bool()
+        },["default","allow_none"])
+    },
+    //none checker
+    {
+        name:"none",
+        scheme:checker@dict({})
+    }
+    //ctx checker
+    {
+        name:"ctx",
+        scheme:checker@dict({
+            allow_none:checker@bool()
+        },["allow_none"])
+    }
+    //object name checker
+    {
+        name:"object_name"
+        scheme:checker@dict({
+            pattern:checker@string(),
+            default:checker@object_name(),
+            allow_none:checker@bool()
+        },["pattern","default","allow_none"])
+    }
+    //object checker
+    {
+        name:"object"
+        scheme:checker@dict({
+            pattern:checker@string(),
+            default:checker@object(),
+            allow_none:checker@bool()
+        },["pattern","instance","allow_none"])
+    }
+    //dict checker
+    {
+        name:"dict",
+        scheme:checker@dict({
+            scheme:checker@dict{
+                unlimit:True
+            },
+            optional:checker@list(checker@string()),
+            unlimit:checker@bool(),
+            allow_none:checker@bool()
+        })
+    }
+    //list checker
+    {
+        name:"list",
+        scheme:checker@dict({
+            element_checker:checker@object("checker@*"),
+            max_numbers:checker@int(),
+            allow_none:checker@bool()
+        },["element_checker","max_numbers","allow_none"])
+    }
+    //enum_checker
+    {
+        name:"enum",
+        scheme:checker@dict({
+            "enums":checker@list(None)
+            "instance":checker@bool()
+        },optional=["instance"])
+    }
+]

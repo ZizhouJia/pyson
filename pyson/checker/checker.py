@@ -4,8 +4,6 @@ import pyson.pyson.pyson_object as pyson_object
 import pyson.regist as regist
 from collections import OrderedDict
 
-#pyson checker存在以下几个遗留问题
-#problem 2:  the support for the basic type value params
 class empty_type(object):
     def __init__(self):
         pass
@@ -13,12 +11,14 @@ class empty_type(object):
 empty=empty_type()
 
 class CheckWrongError(Exception):
-    def __init__(self,msg,location):
+    def __init__(self,msg,location,line,column):
         self.msg=msg
         self.location=location
+        self.line=line
+        self.column=column
     
     def str(self):
-        return_value=self.location+":"+self.msg
+        return_value=self.location+":"+self.msg+" at ("+str(self.line)+","+str(self.column)+")"
         return str(return_value)
 
 def intable(content):
@@ -28,46 +28,89 @@ def intable(content):
     except:
         return False
 
-def check_ctx(ctx,object_name):
-    current_ctx=ctx
-    keys=object_name.split(".")
-    for key in keys:
-        if(intable(key)):
-            if(isinstance(current_ctx,list)):
-                if(int(key)>=len(current_ctx)):
-                    return None
-                current_ctx=current_ctx[int(key)]
-                continue
-            return None
-        else:
-            if(isinstance(current_ctx,dict)):
-                if(key in current_ctx.keys()):
-                    current_ctx=current_ctx[key]
+def find_in_raw(raw_dict,object_name,element_number):
+    def _find_in_raw(raw_dict,object_name):
+        current_ctx=raw_dict
+        keys=object_name.split(".")
+        for key in keys:
+            if(intable(key)):
+                if(isinstance(current_ctx.value,list)):
+                    if(int(key)>=len(current_ctx.value)):
+                        return None
+                    current_ctx=current_ctx.value[int(key)]
                     continue
-                else:
-                    return None
-            return None
-    if(isinstance(current_ctx,pyson_object.pyson_name)):
+                return None
+            else:
+                if(isinstance(current_ctx.value,dict)):
+                    if(key in current_ctx.value.keys()):
+                        current_ctx=current_ctx.value[key]
+                        continue
+                    else:
+                        return None
+                return None
         return current_ctx
-    else:
-        return None
-
-#check the basic type 
-#int float str bool object_name
-def check_basic_type(node,ctx,check_type):
-    if(isinstance(node,check_type)):
-        return
-    if(isinstance(node,pyson_object.pyson_object)):
-        if()
-        
+    search_obj_type=False
+    params=None
+    while(True):
+        current_ctx=_find_in_raw(raw_dict,object_name)
+        if(current_ctx is None):
+            return None
+        if(not isinstance(current_ctx.value,pyson_object.pyson_object)):
+            return None
+        obj=current_ctx.value
+        if(not search_obj_type):
+            if(obj.scope=="self" and obj.params is None):
+                if(current_ctx.element_number>=element_number):
+                    return None
+                element_number=obj.element_number
+                current_ctx=_find_in_raw(raw_dict,obj.object_name)
+            if(obj.scope!="self"):
+                if(current_ctx.element_number>=element_number):
+                    return None
+                return current_ctx
+            if(obj.scope=="self" and obj.params is not None):
+                search_obj_type=True
+                params=obj.params
+                element_number=obj.element_number
+                current_ctx=_find_in_raw(raw_dict,obj.object_name)
+        else:
+            if(obj.params is not None):
+                return None
+            if(obj.scope=="self"):
+                element_number=obj.element_number
+                current_ctx=_find_in_raw(raw_dict,obj.object_name)
+            if(obj.scope!="self"):
+                pys_obj=pyson_object.pyson_object(obj.object_name,obj.scope,params)
+                cont=pyson_object.content(current_ctx.type,pys_obj,element_number,current_ctx.line,current_ctx.column)
+                return cont
+            
 
 class checker(object):
     def __init__(self):
         self.default=None
         self.location=""
+        self.line=0
+        self.column=0
+        
 
-    def check(self,node,ctx):
+    def _check_before(self,current_node,raw_dict,location):
+        self.line=current_node.line
+        self.column=current_node.column
+        self.location=location
+        self.check_before(current_node,raw_dict)
+
+
+    def _check_after(self,current_node,ctx):
+        self.check_after(current_node,ctx)
+
+    def check_before(self,current_node,raw_dict):
         pass
+
+    def check_after(self,current_node,ctx):
+        pass
+    
+    def report_error(self,msg):
+        raise CheckWrongError(msg,self.location,self.line,self.column)
 
     def tips(self):
         return []
@@ -78,111 +121,114 @@ class checker(object):
     def set_location(self,location):
         self.location=location
 
+#关于None的问题，例如定义 min_value 首先min_value是optional，然后allow_none应该是False
+# 如果定义allow_none为True，那么则允许输入为None。如果default_value 为none则需要设定defualt_value 为 NoneType
+
 class int_checker(checker):
     def __init__(self,min_value=None,max_value=None,default=empty,allow_none=False):
         self.min_value=min_value
         self.max_value=max_value
         self.default=default
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check(default,None)):
+        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
             raise RuntimeError("The defualt value is wrong "+str(default))
 
-    def check(self,node,ctx):
+    def check_after(self,node,ctx):
         if(node is None and self.allow_none):
             return
         if(node is None):
-            raise CheckWrongError("The value should not be None, set the allow_none be True for None value",self.location)
+            self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,int)):
-            raise CheckWrongError("Input type int is expected but got "+str(type(node)),self.location)
+            self.report_error("Input type int is expected but got "+str(type(node)))
         if(self.min_value is not None):
             if(node<self.min_value):
-                raise CheckWrongError("The input value "+str(node)+" is smaller than the min_value "+str(self.min_value),self.location)
+                self.report_error("The input value "+str(node)+" is smaller than the min_value "+str(self.min_value))
         if(self.max_value is not None):
             if(node>self.max_value):
-                raise CheckWrongError("The input value "+str(node)+" is bigger than the max_value "+str(self.min_value),self.location)
+                self.report_error("The input value "+str(node)+" is bigger than the max_value "+str(self.min_value))
     
     def tips(self):
         return []
 
 class float_checker(checker):
-    def __init__(self,min_value=None,max_value=None,default=None,allow_none=False):
+    def __init__(self,min_value=None,max_value=None,default=empty,allow_none=False):
         self.min_value=min_value
         self.max_value=max_value
         self.default=default
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check(default,None)):
+        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
             raise RuntimeError("The defualt value is wrong "+str(default))
     
-    def check(self,node,ctx):
+    def check_after(self,node,ctx):
         if(node is None and self.allow_none):
             return
         if(node is None):
-            raise CheckWrongError("The value should not be None, set the allow_none be True for None value",self.location)
+            self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,(int,float))):
-            raise CheckWrongError("Input type float is expected but got "+str(type(node)),self.location)
+            self.report_error("Input type float is expected but got "+str(type(node)))
         if(self.min_value is not None):
             if(node<self.min_value):
-                raise CheckWrongError("The input value "+str(node)+" is smaller than the min_value "+str(self.min_value),self.location)
+                self.report_error("The input value "+str(node)+" is smaller than the min_value "+str(self.min_value))
         if(self.max_value is not None):
             if(node>self.max_value):
-                raise CheckWrongError("The input value "+str(node)+" is bigger than the max_value "+str(self.min_value),self.location)
+                self.report_error("The input value "+str(node)+" is bigger than the max_value "+str(self.min_value))
     
     def tips(self):
         return []
 
 class string_checker(checker):
-    def __init__(self,pattern=None,default=None,allow_none=False):
+    def __init__(self,pattern=None,default=empty,allow_none=False):
         self.pattern=pattern
         self.default=default
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check(default,None)):
+        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
             raise RuntimeError("The defualt value is wrong "+str(default))
 
-    def check(self,node,ctx):
+    def check_after(self,node,ctx):
         if(node is None and self.allow_none):
             return
         if(node is None):
-            raise CheckWrongError("The value should not be None, set the allow_none be True for None value",self.location)
+            self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,str)):
-            raise CheckWrongError("Input type str is expected but got "+str(type(node)),self.location)
+            self.report_error("Input type str is expected but got "+str(type(node)))
         if(self.pattern is not None and re.match(self.pattern,node) is None):
-            raise CheckWrongError("The input string should match the regular expression "+self.pattern,self.location)
+            self.report_error("The input string should match the regular expression "+self.pattern)
 
 class bool_checker(checker):
     def __init__(self,default=None,allow_none=False):
         self.default=default
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check(default,None)):
+        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
             raise RuntimeError("The defualt value is wrong "+str(default))
     
-    def check(self,node,ctx):
+    def check_after(self,node,ctx):
         if(node is None and self.allow_none):
             return
         if(node is None):
-            raise CheckWrongError("The value should not be None, set the allow_none be True for None value",self.location)
+            self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,bool)):
-            raise CheckWrongError("Input type bool is expected but got "+str(type(node)),self.location)
+            self.report_error("Input type bool is expected but got "+str(type(node)))
 
 class object_name_checker(checker):
     def __init__(self,pattern=None,default=None,allow_none=False):
         self.pattern=pattern
         self.default=default
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check(default,None)):
+        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
             raise RuntimeError("The defualt value is wrong "+str(default))
     
-    def check(self,node,ctx):
+    def check_after(self,node,ctx):
         if(node is None and self.allow_none):
             return
         if(node is None):
-            raise CheckWrongError("The value should not be None, set the allow_none be True for None value",self.location)
+            self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,pyson_object.pyson_object)):
-            raise CheckWrongError("Input type object is expected but got "+str(type(node)),self.location)
+            self.report_error("Input type object is expected but got "+str(type(node)))
         #match the pattern 
         if(self.pattern is not None):
             object=node.scope+"#"+node.object_name
             if(re.match(self.pattern,object) is not None):
-                raise CheckWrongError("The input "+str(object)+" should match the regular expression "+self.pattern,self.location)
+                self.report_error("The input "+str(object)+" should match the regular expression "+self.pattern)
 
 
     
@@ -190,89 +236,78 @@ class none_checker(checker):
     def __init__(self):
         pass
 
-    def check(self,node,ctx):
+    def check_after(self,node,ctx):
         if(node is not None):
-            raise CheckWrongError("The input should be None",self.location)
+            self.report_error("The input should be None")
 
 class ctx_checker(checker):
     def __init__(self,allow_none=False):
         self.allow_none=allow_none
 
-    def check(self,node,ctx):
+    def check_before(self,node,raw_dict):
+        node=node.value
         if(node is None and self.allow_none):
             return
         if(node is None):
-            raise CheckWrongError("The value should not be None, set the allow_none be True for None value",self.location)
-        if(isinstance(node,tuple)):
-            if(node[0]!="ctx"):
-                raise CheckWrongError("The input should be ctx",self.location)
+            self.report_error("The value should not be None, set the allow_none be True for None value")
+        if(isinstance(node,pyson_object.pyson_object)):
+            if(node.object_name!="ctx"):
+                self.report_error("The input should be ctx")
         else:
-            raise CheckWrongError("The input should be ctx",self.location)
+            self.report_error("The input should be ctx")
 
 class object_checker(checker):
-    def __init__(self,pattern=None,default=None,instance=True,allow_none=False):
+    def __init__(self,pattern=None,instance=True,allow_none=False):
         self.pattern=pattern
-        self.default=default
         self.instance=instance
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check(default,None)):
-            raise RuntimeError("The defualt value is wrong "+str(default))
     
-    def check(self,node,ctx):
+    def check_before(self,node,raw_dict):
+        node=node.value
+        element_number=node.element_number
         if(node is None and self.allow_none):
             return
         if(node is None):
-            raise CheckWrongError("The value should not be None, set the allow_none be True for None value",self.location)
+            self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,pyson_object.pyson_object)):
-            raise CheckWrongError("Input type object is expected but got "+str(type(node)),self.location)
+            self.report_error("Input type object is expected but got "+str(type(node)))
         #match the pattern 
         if(self.pattern is not None):
             object=node.scope+"@"+node.object_name
             if(re.match(self.pattern,object) is not None):
-                raise CheckWrongError("The input "+str(object)+" should match the regular expression "+self.pattern,self.location)
+                self.report_error("The input "+str(object)+" should match the regular expression "+self.pattern)
         
-        #find the element in reg and ctx
+        #find the element in reg and raw_dict
         reg=regist.reg
         object_tuple=reg.get_object(node.object_name,node.scope)
         if(object_tuple is not None):
              #instance check
             if(not self.instance):
                 if(node.params is not None):
-                   raise CheckWrongError("The object is an instance type, set the instance be True",self.location)
+                   self.report_error("The object is an instance type, set the instance be True")
                 return
             if(node.params is None):
-                raise CheckWrongError("The object should not be instanced, set the instance be False",self.location)
-            self._check_params(node.node_params,object_tuple[1],ctx)
+                self.report_error("The object should not be instanced, set the instance be False")
         else:
             #check if the element in the current dict
             if(node.scope=="self"):
-                prev_node=check_ctx(ctx,node.object_name)
+                prev_node=find_in_raw(raw_dict,node.object_name,element_number)
                 if(prev_node is None):
-                    raise CheckWrongError("The "+node.object_name+" could not be found",self.location)
+                    self.report_error("The "+node.object_name+" could not be found")
                 if(not self.instance):
+                    if(node.params is not None):
+                        self.report_error("The object is an instance type, set the instance be True")
                     if(prev_node.params is not None):
-                        raise CheckWrongError("The object is an instance type, set the instance be True",self.location)
+                        self.report_error("The object is an instance type, set the instance be True")
                     return
-                if(node.params is None):
-                    raise CheckWrongError("The object should not be instanced, set the instance be False",self.location)
-                return
+                else:
+                    if(node.params is not None and prev_node.params is not None):
+                        self.report_error("The multiple calls")
+                    if(node.params is None and prev_node.params is None):
+                        self.report_error("The object should not be instanced, set the instance be False")
+                    return
             else:
-                raise CheckWrongError("The "+node.object_name+" could not be found",self.location)
-    
-    def _check_params(self,node_params,scheme,ctx):
-        d_checker=dict_checker(scheme)
-        d_checker.set_location(self.location)
-        if(isinstance(node_params,list)):
-            node_params_dict=OrderedDict()
-            scheme_keys=list(scheme.keys())
-            if(len(scheme_keys)<len(node_params)):
-                raise CheckWrongError("The wrong parameter list",self.location)
-            for i in range(0,len(node_params)):
-                node_params_dict[scheme_keys[i]]=node_params[i]
-            d_checker.check(node_params_dict,ctx)
-        if(isinstance(node_params,dict)):
-            d_checker.check(node_params,ctx)
-        raise CheckWrongError("The unexpected error",self.location)
+                self.report_error("The "+node.object_name+" could not be found")
 
     def get_default(self):
         if(self.instance):
@@ -292,13 +327,15 @@ class dict_checker(checker):
         self.allow_none=allow_none
 
     
-    def check(self,node,ctx):
+    def check_before(self,node,ctx):
+        element_number=node.element_number
+        node=node.value
         if(node is None and self.allow_none):
             return True
         if(node is None):
-            raise CheckWrongError("The value should not be None, set the allow_none be True for None value",self.location)
+            self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,dict)):
-            raise CheckWrongError("Input type dict is expected but got "+str(type(node)),self.location)
+            self.report_error("Input type dict is expected but got "+str(type(node)))
         #the node is a ordered dict
         scheme_keys=list(self.scheme.keys())
         node_dict_keys=list(node.keys())
@@ -307,12 +344,8 @@ class dict_checker(checker):
             if(current_key not in scheme_keys and self.unlimit):
                 continue
             if(current_key not in scheme_keys):
-                raise CheckWrongError("Key "+str(current_key)+" not found in dict define",self.location+"."+str(current_key))
+                self.report_error("Key "+str(current_key)+" not found in dict define")
             item_checker=self.scheme[current_key]
-            if(item_checker is None):
-                continue
-            item_checker.set_location(self.location+"."+current_key)
-            item_checker.check(node[current_key],ctx)
             del scheme_keys[current_key]
         #if the key not appear in the node
         #it may have the default value or in the optional dict
@@ -322,48 +355,63 @@ class dict_checker(checker):
                 continue
             item_checker=self.scheme[current_key]
             if(item_checker is None):
-                raise CheckWrongError("Key "+str(current_key)+" is required in dict define",self.location+"."+str(current_key))
+                self.report_error("Key "+str(current_key)+" is required in dict define")
             default_value=item_checker.get_default()
             if(not isinstance(default_value,empty_type)):
-                node[current_key]=default_value
+                node[current_key]=pyson_object.content(type(default_value),default_value,element_number,self.line,self.column)
                 continue
-            raise CheckWrongError("Key "+str(current_key)+" is required in dict define",self.location+"."+str(current_key))
+            self.report_error("Key "+str(current_key)+" is required in dict define")
 
 
 #the list checker for check list
 class list_checker(checker):
-    def __init__(self,checkers=[],max_numbers=-1,allow_none=False):
-        self.checkers=checkers
+    def __init__(self,element_checker=None,max_numbers=-1,allow_none=False):
+        self.element_checker=element_checker
         self.max_numbers=max_numbers
         self.allow_none=allow_none
     
-    def check(self,node,ctx):
+    def check_before(self,node,raw_dict):
+        node=node.value
         if(node is None and self.allow_none):
             return
         if(node is None):
-            raise CheckWrongError("The value should not be None, set the allow_none be True for None value",self.location)
+            self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,list)):
-            raise CheckWrongError("Input type list is expected but got "+str(type(node)),self.location)
+            self.report_error("Input type list is expected but got "+str(type(node)))
         for i in range(0,len(node)):
             element=node[i]
-            if(not self._check_single(element,ctx,i)):
-                raise CheckWrongError("The input type doesn't satisify the list type requirement"+str(type(node)),self.location)
+            if(not self._check_single_before(element,raw_dict)):
+                self.report_error("The input type doesn't satisify the list type requirement"+str(type(node)))
     
-    def _check_single(self,element,ctx,index):
-        if(len(self.checkers)==0):
+    def check_after(self,node,ctx):
+        for i in range(0,len(node)):
+            element=node[i]
+            if(not self._check_single_after(element,ctx)):
+                self.report_error("The input type doesn't satisify the list type requirement"+str(type(node)))
+
+    
+    def _check_single_before(self,element,raw_dict):
+        if(self.element_checker is None):
             return True
-        for checker in self.checkers:
-            try:
-                checker.set_location(self.location+"["+str(index)+']')
-                checker.check(element,ctx)
-                return True
-            except:
-                continue
-        return False
+        try:
+            element.check_before(element,ctx)
+            return True
+        except:
+            return False
+    
+    def _check_single_after(self,element,raw_dict):
+        if(self.element_checker is None):
+            return True
+        try:
+            element.check_after(element,ctx)
+            return True
+        except:
+            return False
         
 
     def get_default(self):
         return None
+
 
 #enum type
 class enum_checker(checker):
@@ -376,7 +424,7 @@ class enum_checker(checker):
                 continue
             if(isinstance(item,(float,int,str,bool,pyson_object.pyson_name))):
                 continue
-            raise RuntimeError("Eorror for enums")
+            raise RuntimeError("Unsupport value in enumeration")
     
     def _check_pyson_object(self,node):
         for i in range(0,self.enums):
@@ -387,23 +435,22 @@ class enum_checker(checker):
         return False
             
     
-    def check(self,node,ctx):
+    def check_before(self,node,raw_dict):
+        node=node.value
         if(node is None):
             if(node in self.enums):
                 return
             else:
-                raise CheckWrongError("The value None not in the enumeration",self.location)
+                self.report_error("The value None not in the enumeration")
         if(isinstance(node,(float,int,str,bool))):
             if(node in self.enums):
                 return
             else:
-                raise CheckWrongError("The value "+str(node)+" not in the enumeration",self.location)
+                self.report_error("The value "+str(node)+" not in the enumeration")
         if(isinstance(node,pyson_object.pyson_object)):
             if(self._check_pyson_object(node)):
-                obj_checker=object_checker(instance=self.instance)
-                obj_checker.set_location(self.location)
-                obj_checker.check(node,ctx)
+                return
             else:
-                raise CheckWrongError("The value "+str(node.scope)+"#"+str(node.pyson_name)+" not in the enumeration",self.location)
+                self.report_error("The value "+str(node.scope)+"#"+str(node.pyson_name)+" not in the enumeration")
 
 
