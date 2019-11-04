@@ -1,25 +1,14 @@
 #-*-coding:utf-8 -*-
 import re
 import pyson.pyson.pyson_object as pyson_object
-import pyson.regist as regist
 from collections import OrderedDict
+from pyson.error import CheckWrongError
 
 class empty_type(object):
     def __init__(self):
         pass
 
 empty=empty_type()
-
-class CheckWrongError(Exception):
-    def __init__(self,msg,location,line,column):
-        self.msg=msg
-        self.location=location
-        self.line=line
-        self.column=column
-    
-    def str(self):
-        return_value=self.location+":"+self.msg+" at ("+str(self.line)+","+str(self.column)+")"
-        return str(return_value)
 
 def intable(content):
     try:
@@ -271,43 +260,30 @@ class object_checker(checker):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,pyson_object.pyson_object)):
             self.report_error("Input type object is expected but got "+str(type(node)))
+        
         #match the pattern 
         if(self.pattern is not None):
             object=node.scope+"@"+node.object_name
             if(re.match(self.pattern,object) is not None):
                 self.report_error("The input "+str(object)+" should match the regular expression "+self.pattern)
         
-        #find the element in reg and raw_dict
-        reg=regist.reg
-        object_tuple=reg.get_object(node.object_name,node.scope)
-        if(object_tuple is not None):
-             #instance check
+        #check if the element in the current dict
+        if(node.scope=="self"):
+            prev_node=find_in_raw(raw_dict,node.object_name,element_number)
+            if(prev_node is None):
+                self.report_error("The "+node.object_name+" could not be found")
             if(not self.instance):
                 if(node.params is not None):
-                   self.report_error("The object is an instance type, set the instance be True")
+                    self.report_error("The object is an instance type, set the instance be True")
+                if(prev_node.params is not None):
+                    self.report_error("The object is an instance type, set the instance be True")
                 return
-            if(node.params is None):
-                self.report_error("The object should not be instanced, set the instance be False")
-        else:
-            #check if the element in the current dict
-            if(node.scope=="self"):
-                prev_node=find_in_raw(raw_dict,node.object_name,element_number)
-                if(prev_node is None):
-                    self.report_error("The "+node.object_name+" could not be found")
-                if(not self.instance):
-                    if(node.params is not None):
-                        self.report_error("The object is an instance type, set the instance be True")
-                    if(prev_node.params is not None):
-                        self.report_error("The object is an instance type, set the instance be True")
-                    return
-                else:
-                    if(node.params is not None and prev_node.params is not None):
-                        self.report_error("The multiple calls")
-                    if(node.params is None and prev_node.params is None):
-                        self.report_error("The object should not be instanced, set the instance be False")
-                    return
             else:
-                self.report_error("The "+node.object_name+" could not be found")
+                if(node.params is not None and prev_node.params is not None):
+                    self.report_error("The multiple calls")
+                if(node.params is None and prev_node.params is None):
+                    self.report_error("The object should not be instanced, set the instance be False")
+                return
 
     def get_default(self):
         if(self.instance):

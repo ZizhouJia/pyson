@@ -1,6 +1,62 @@
+/*
+针对于pyson的格式，我这里有以下几种考虑。
+第一种，保留原样，即key不添加引号，不是key添加引号
+第二种，完全符合json的用法，key添加引号
+第三种，符合python的dict的语法，即冒号添加引号，等号不添加引号
+第四种，支持所有的表达格式
+针对函数调用的用法
+第一种，只保留dict用法
+第二种，添加list用法
+第三种，添加=号用法
+*/
+
+
+/*
+下面做出如下更改
+(1) ctx更改为self
+(2) 所有的self@name 都更改为self.name
+(3) 所有的import@name 都直接使用name调用,name可以是单个，例如len,list等关键词法
+(4) 自注册的function，在使用之前加上 @,例如@name1.name2
+(5) 只有自注册的function包含scheme
+(6) 引用方法由例如 self.1.name 更改为self[1].name 符合python规范，self引用的关键词不能再进行call，scheme要对self引用的关键词来进行检测
+(7) reg中增添选项禁用python固有库的调用
+(8) 将pyson_name等关键词更改为pyson固有固件
+*/
+
+/*
+下面对命名做出规范
+(1) 对于输入的字符内容叫做pyson string
+(2) 用于检测约束的内容叫做pyson scheme
+(3) 产生的字典类型的结果叫做 pyson dict
+(4) 产生的对象类型的结果叫做 pyson object
+(5) 整个语言范式叫做pyson
+(6) 补充：所有的实例统称object，对object的调用称为object call
+*/
+
+/*
+下面对scheme做出规范
+scheme仅针对于自注册的function
+对self对象和调用以及默认的函数调用不做要求
+*/
+
+/*
+下面对三种类型的表现做出规范
+self是一种独立的关键词
+self.object和name1.name2和自注册object等同，都统称为object
+取消object name
+*/
+
+/*
+增添特殊字段@empty @pyson_name等
+*/
+
 [{
     path:"checker.py",
-    exist:import@os.path.exists(self@0.path),
+    exist:import@os.path.exists(self[0].path),
     list:[1,2,import@os.path],
     context:ctx
 }, #os.path]
+
+
+
+

@@ -49,14 +49,14 @@
     {
         name:"none",
         scheme:checker@dict({})
-    }
+    },
     //ctx checker
     {
         name:"ctx",
         scheme:checker@dict({
             allow_none:checker@bool()
         },["allow_none"])
-    }
+    },
     //object name checker
     {
         name:"object_name"
@@ -65,7 +65,7 @@
             default:checker@object_name(),
             allow_none:checker@bool()
         },["pattern","default","allow_none"])
-    }
+    },
     //object checker
     {
         name:"object"
@@ -74,7 +74,7 @@
             default:checker@object(),
             allow_none:checker@bool()
         },["pattern","instance","allow_none"])
-    }
+    },
     //dict checker
     {
         name:"dict",
@@ -86,7 +86,7 @@
             unlimit:checker@bool(),
             allow_none:checker@bool()
         })
-    }
+    },
     //list checker
     {
         name:"list",
@@ -95,13 +95,13 @@
             max_numbers:checker@int(),
             allow_none:checker@bool()
         },["element_checker","max_numbers","allow_none"])
-    }
+    },
     //enum_checker
     {
         name:"enum",
         scheme:checker@dict({
-            "enums":checker@list(None)
-            "instance":checker@bool()
-        },optional=["instance"])
+            enums:checker@list(None)
+            instance:checker@bool()
+        },optional:["instance"])
     }
 ]
