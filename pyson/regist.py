@@ -2,20 +2,34 @@
 import os
 import importlib
 import pkgutil
+
+from pyson.error import pyson_error
+
+#change the register
 class register(object):
     def __init__(self):
         self.regist_object={}
-        self.regist_solver={}
-        self.regist_object["default"]={}
+        self.package_load_allow=True
     
-    def regist(self,object_name,obj,scheme=None,scope="default"):
-        if(scope in ["import","scheme"]):
-            raise RuntimeError("The scope should not be import or scheme")
-        if(scope not in self.regist_object.keys()):
-            self.regist_object[scope]={}
-        self.regist_object[scope][object_name]=(obj,scheme)
+    def regist(self,object_name,obj,scheme=None):
+        if(object_name in self.regist_object.keys()):
+            raise pyson_error.ReigistError("The "+str(object_name)+" has already been used")
+        self.regist_object[object_name]=[obj,scheme]
     
-    def _load_package(self,module_list):
+    def set_scheme(self,object_name,scheme):
+        if(object_name not in self.regist_object.keys()):
+            raise pyson_error.ReigistError("The "+str(object_name)+" is not been registed")
+        self.regist_object[object_name][1]=scheme
+        
+    def get_object(self,object_name):
+        if(object_name not in self.regist_object.keys()):
+            return None
+        return self.regist_object[object_name]
+    
+    def load_package_object(self,object_name):
+        if(not self.package_load_allow):
+            return None
+        module_list=object_name.split('.')
         try:
             package=importlib.import_module(module_list[0])
             for i in range(1,len(module_list)):
@@ -23,36 +37,6 @@ class register(object):
             return package
         except:
             return None
-    
-    def set_scheme(self,object_name,scheme,scope="default"):
-        if(scope not in self.regist_object.keys()):
-            raise RuntimeError("The scope can not be found")
-        object_dict=self.regist_object[scope]
-        if(object_name not in object_dict):
-            raise RuntimeError("The object is not resigted")
-        object_dict[object_name][1]=scheme
-        
-    def get_object(self,object_name,scope):
-        if(scope=="import"):
-            others=object_name.split('.')
-            package=self._load_package(others)
-            if(package is None):
-                return None
-            return (package,None)
-            
-        if(scope not in self.regist_object.keys()):
-            return None
-        if(object_name not in self.regist_object[scope].keys()):
-            return None
-        return self.regist_object[scope][object_name]
-    
-    def load_sheme_from_file(self,file_path):
-        pass
-
-    def regist_scheme(self,scheme_name,scheme=None):
-        if("scheme" not in self.regist_object.keys()):
-            self.regist_object["scheme"]={}
-        self.regist_object["scheme"][scheme_name]=(scheme,None)
 
 
 

@@ -3,8 +3,7 @@ from . import pyson
 from antlr4 import *
 from collections import OrderedDict
 from pyson.error import TransformWrongError
-
-
+from pyson.error import SyntaxErrorListener
 
 #The translated pyson object contain two element,The first one is origin element and the second one is the translated element
 #The origin object and the corresponding checker pass to the function call the function first check the origin object and call the function to build the traslated element 
@@ -51,7 +50,7 @@ class obj(object):
         
     def _extract_obj_string(self,prefix,value,stored_dict,root_id=None):
         if(root_id==id(value)):
-            stored_dict[prefix]=("ctx","ctx")
+            stored_dict[prefix]=("self","self")
             return
         if(root_id is None):
             root_id=id(self)
@@ -64,7 +63,7 @@ class obj(object):
             return
         if(isinstance(value,list)):
             for i in range(0,len(value)):
-                self._extract_obj_string(prefix+"["+str(i+1)+"]",value[i],stored_dict,root_id)
+                self._extract_obj_string(prefix+"."+str(i+1),value[i],stored_dict,root_id)
             return
         if(isinstance(value,(int,float,bool,str))):
             stored_dict[prefix]=value
@@ -92,9 +91,11 @@ class transformer(object):
         self.reg=reg
     
     def _get_object(self,object_name,scope,root_store):
-        if(scope!="self"):
-            return self.reg.get_object(object_name,scope)
-        else:
+        if(scope=="name"):
+            return self.reg.get_object(object_name)
+        if(scope=="import"):
+            return (self.reg.load_package_object(object_name),None)
+        if(scope=="self"):
             object_name=object_name.split('.')
             current_node=root_store
             for i in range(0,len(object_name)):
@@ -125,10 +126,11 @@ class transformer(object):
         if(checker is not None):
             checker._check_before(current_list,raw_dict)
         for i in range(0,len(current_list)):
+            #set current location
+            current_location=location
+            current_location=current_location+"."+str(i)
+            #checker the type
             if(isinstance(current_list[i].value,(int,float,bool,str))):
-                current_store.append(current_list[i].value)
-                continue
-            if(isinstance(current_list[i].value,pyson.pyson_object.pyson_name)):
                 current_store.append(current_list[i].value)
                 continue
             if(current_list[i].value is None):
@@ -139,7 +141,7 @@ class transformer(object):
                 obj_checker=None
                 if(checker is not None):
                     obj_checker=checker.element_checker
-                self._transform_object(current_list[i],raw_dict,store,root_store,location+"["+str(i)+"]",obj_checker)
+                self._transform_object(current_list[i],raw_dict,store,root_store,current_location,obj_checker)
                 current_store.append(store[0])
                 continue
             if(isinstance(current_list[i].value,list)):
@@ -148,7 +150,7 @@ class transformer(object):
                 if(checker is not None):
                     obj_checker=checker.element_checker
                 current_store.append(store)
-                self._transform_list(current_list[i],raw_dict,store,root_store,location+"["+str(i)+"]",obj_checker)
+                self._transform_list(current_list[i],raw_dict,store,root_store,current_location,obj_checker)
                 continue
             if(isinstance(current_list[i].value,dict)):
                 store={}
@@ -156,7 +158,7 @@ class transformer(object):
                 if(checker is not None):
                     obj_checker=checker.element_checker
                 current_store.append(store)
-                self._transform_dict(current_list[i],raw_dict,store,root_store,location+"["+str(i)+"]",obj_checker)
+                self._transform_dict(current_list[i],raw_dict,store,root_store,current_location,obj_checker)
                 continue
         if(checker is not None):
             checker._check_after(current_store,root_store)
@@ -166,21 +168,22 @@ class transformer(object):
         if(checker is not None):
             checker._check_before(current_dict,raw_dict)
         for key,value in current_dict.items():
+            #set error location
+            current_location=location
+            current_location=current_location+"."+str(key)
+            #check the type
             if(isinstance(current_dict[key].value,(int,float,bool,str))):
                 current_store[key]=value.value
                 continue
             if(current_dict[key].value is None):
                 current_store[key]=None
                 continue
-            if(isinstance(current_dict[key].value,pyson.pyson_object.pyson_name)):
-                current_store[key]=current_dict[key].value
-                continue
             if(isinstance(current_dict[key].value,pyson.pyson_object.pyson_object)):
                 store=[]
                 obj_checker=None
                 if(checker is not None):
                     obj_checker=checker.scheme[key]
-                self._transform_object(current_dict[key],raw_dict,store,root_store,location+"."+str(key),obj_checker)
+                self._transform_object(current_dict[key],raw_dict,store,root_store,current_location,obj_checker)
                 current_store[key]=store[0]
                 continue
             if(isinstance(current_dict[key].value,list)):
@@ -189,7 +192,7 @@ class transformer(object):
                 obj_checker=None
                 if(checker is not None):
                     obj_checker=checker.scheme[key]
-                self._transform_list(current_dict[key],raw_dict,store,root_store,location+"."+str(key),obj_checker)
+                self._transform_list(current_dict[key],raw_dict,store,root_store,current_location,obj_checker)
                 continue
             if(isinstance(current_dict[key].value,dict)):
                 store={}
@@ -197,7 +200,7 @@ class transformer(object):
                 obj_checker=None
                 if(checker is not None):
                     obj_checker=checker.scheme[key]
-                self._transform_dict(current_dict[key],raw_dict,store,root_store,location+"."+str(key),obj_checker)
+                self._transform_dict(current_dict[key],raw_dict,store,root_store,current_location,obj_checker)
                 continue
         if(checker is not None):
             checker._check_after(current_store,root_store)
@@ -208,7 +211,7 @@ class transformer(object):
         pyson_object=pyson_object.value
         if(checker is not None):
             checker._check_before(pyson_object,raw_dict)
-        if(pyson_object.object_name=="ctx"):
+        if(pyson_object.object_name=="" and pyson_object.scope=="self"):
             current_store.append(root_store)
             return
         obj_class=self._get_object(pyson_object.object_name,pyson_object.scope,root_store)
@@ -216,7 +219,7 @@ class transformer(object):
             raise TransformWrongError("The "+pyson_object.object_name+" can not be found",
         location,origin_pyson_object.line,origin_pyson_object.column)
         if(pyson_object.scope=="self" and pyson_object.params is not None):
-            raise TransformWrongError("The self scope object can't be called",
+            raise TransformWrongError("The self object can't be called",
         location,origin_pyson_object.line,origin_pyson_object.column)
         if(pyson_object.params is None):
             current_store.append(obj_class[0])
@@ -225,14 +228,14 @@ class transformer(object):
         try:
             if(isinstance(pyson_object.params.value,dict)):
                 params={}
-                self._transform_dict(pyson_object.params,raw_dict,params,root_store,location,obj_class[1])
+                self._transform_dict(pyson_object.params,raw_dict,params,root_store,location+"#params",obj_class[1])
                 obj=obj_class[0](**params)
                 current_store.append(obj)
                 return
             if(isinstance(pyson_object.params.value,list)):
                 if(obj_class[1] is None):
                     params_list=[]
-                    self._transform_list(pyson_object.params,raw_dict,params_list,root_store,location,None)
+                    self._transform_list(pyson_object.params,raw_dict,params_list,root_store,location+"#params",None)
                     obj=obj_class[0](*params_list)
                     current_store.append(obj)
                     return
@@ -250,7 +253,7 @@ class transformer(object):
                         key=scheme_keys[i]
                         new_dict[key]=params_list[i]
                     origin_pyson_object.value.params=new_dict
-                    self._transform_dict(origin_pyson_object,raw_dict,params_list,root_store,location,scheme)
+                    self._transform_dict(origin_pyson_object,raw_dict,params_list,root_store,location+"#params",scheme)
                     obj=obj_class[0](*params_list)
                     current_store.append(obj)
                     return
@@ -263,15 +266,14 @@ class transformer(object):
 
     def transfrom(self,pyson_obj,checker=None):
         if(isinstance(pyson_obj.value,dict)):
-            print("in")
             root_store={}
             current_store=root_store
-            self._transform_dict(pyson_obj,pyson_obj,current_store,root_store,"",checker)
+            self._transform_dict(pyson_obj,pyson_obj,current_store,root_store,"self",checker)
             return root_store
         if(isinstance(pyson_obj.value,list)):
             root_store=[]
             current_store=root_store
-            self._transform_list(pyson_obj,pyson_obj,current_store,root_store,"",checker)
+            self._transform_list(pyson_obj,pyson_obj,current_store,root_store,"self",checker)
             return root_store
         else:
             return None
@@ -284,28 +286,36 @@ trans=transformer(reg)
 def from_file(file_name,checker=None):
     input=FileStream(file_name,encoding='utf-8')
     lexer=pyson.pysonLexer.pysonLexer(input)
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(SyntaxErrorListener())
     token_stream=CommonTokenStream(lexer)
     parser=pyson.pysonParser.pysonParser(token_stream)
+    parser.removeErrorListeners()
+    parser.addErrorListener(SyntaxErrorListener())
     tree=parser.entry_point()
     listener=pyson.pysonListener.pysonListener()
-    # tree_str=tree.toStringTree(recog=parser)
     walker=ParseTreeWalker()
     walker.walk(listener,tree)
     d=listener.return_value
     result=trans.transfrom(d,checker)
     return result
 
-def from_string(pyson_string,checke=None):
+def from_string(pyson_string,checker=None):
     input=InputStream(pyson_string)
     lexer=pyson.pysonLexer.pysonLexer(input)
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(SyntaxErrorListener())
     token_stream=CommonTokenStream(lexer)
     parser=pyson.pysonParser.pysonParser(token_stream)
+    parser.removeErrorListeners()
+    parser.addErrorListener(SyntaxErrorListener())
     tree=parser.entry_point()
     listener=pyson.pysonListener.pysonListener()
     walker=ParseTreeWalker()
     walker.walk(listener,tree)
     d=listener.return_value
     result=trans.transfrom(d,checker)
+    
     return result
 
 def to_object(pyson_dict):

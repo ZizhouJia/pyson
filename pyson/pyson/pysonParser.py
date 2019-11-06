@@ -1,42 +1,40 @@
-# Generated from pyson.g4 by ANTLR 4.7.2
+# Generated from pyson.g4 by ANTLR 4.7.1
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
 from typing.io import TextIO
 import sys
 
-
 def serializedATN():
     with StringIO() as buf:
-        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\27")
-        buf.write("Z\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b")
+        buf.write("\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\26")
+        buf.write("Y\4\2\t\2\4\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b")
         buf.write("\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f\t\f\3\2\3\2\5\2\33")
         buf.write("\n\2\3\3\3\3\3\3\3\3\3\4\3\4\3\4\3\4\5\4%\n\4\3\5\3\5")
         buf.write("\3\5\3\5\3\5\5\5,\n\5\3\6\3\6\3\6\3\6\3\7\3\7\3\7\3\7")
-        buf.write("\3\7\3\7\3\7\3\7\3\7\3\7\3\7\5\7=\n\7\3\b\3\b\3\b\3\b")
-        buf.write("\5\bC\n\b\3\t\3\t\3\t\3\t\3\t\5\tJ\n\t\3\n\3\n\3\n\3\n")
-        buf.write("\3\13\3\13\3\13\3\13\3\f\3\f\3\f\3\f\5\fX\n\f\3\f\2\2")
-        buf.write("\r\2\4\6\b\n\f\16\20\22\24\26\2\2\2_\2\32\3\2\2\2\4\34")
-        buf.write("\3\2\2\2\6$\3\2\2\2\b+\3\2\2\2\n-\3\2\2\2\f<\3\2\2\2\16")
-        buf.write("B\3\2\2\2\20I\3\2\2\2\22K\3\2\2\2\24O\3\2\2\2\26S\3\2")
-        buf.write("\2\2\30\33\5\4\3\2\31\33\5\22\n\2\32\30\3\2\2\2\32\31")
-        buf.write("\3\2\2\2\33\3\3\2\2\2\34\35\7\17\2\2\35\36\5\6\4\2\36")
-        buf.write("\37\7\20\2\2\37\5\3\2\2\2 !\5\n\6\2!\"\5\b\5\2\"%\3\2")
-        buf.write("\2\2#%\3\2\2\2$ \3\2\2\2$#\3\2\2\2%\7\3\2\2\2&\'\7\r\2")
-        buf.write("\2\'(\5\n\6\2()\5\b\5\2),\3\2\2\2*,\3\2\2\2+&\3\2\2\2")
-        buf.write("+*\3\2\2\2,\t\3\2\2\2-.\7\t\2\2./\7\16\2\2/\60\5\f\7\2")
-        buf.write("\60\13\3\2\2\2\61=\7\3\2\2\62=\7\4\2\2\63=\7\5\2\2\64")
-        buf.write("=\7\6\2\2\65=\7\7\2\2\66=\7\n\2\2\67=\7\b\2\28=\7\f\2")
-        buf.write("\29=\5\4\3\2:=\5\22\n\2;=\5\26\f\2<\61\3\2\2\2<\62\3\2")
-        buf.write("\2\2<\63\3\2\2\2<\64\3\2\2\2<\65\3\2\2\2<\66\3\2\2\2<")
-        buf.write("\67\3\2\2\2<8\3\2\2\2<9\3\2\2\2<:\3\2\2\2<;\3\2\2\2=\r")
-        buf.write("\3\2\2\2>?\5\f\7\2?@\5\20\t\2@C\3\2\2\2AC\3\2\2\2B>\3")
-        buf.write("\2\2\2BA\3\2\2\2C\17\3\2\2\2DE\7\r\2\2EF\5\f\7\2FG\5\20")
-        buf.write("\t\2GJ\3\2\2\2HJ\3\2\2\2ID\3\2\2\2IH\3\2\2\2J\21\3\2\2")
-        buf.write("\2KL\7\21\2\2LM\5\16\b\2MN\7\22\2\2N\23\3\2\2\2OP\7\23")
-        buf.write("\2\2PQ\5\16\b\2QR\7\24\2\2R\25\3\2\2\2SW\7\13\2\2TX\5")
-        buf.write("\4\3\2UX\5\24\13\2VX\3\2\2\2WT\3\2\2\2WU\3\2\2\2WV\3\2")
-        buf.write("\2\2X\27\3\2\2\2\t\32$+<BIW")
+        buf.write("\3\7\3\7\3\7\3\7\3\7\3\7\5\7<\n\7\3\b\3\b\3\b\3\b\5\b")
+        buf.write("B\n\b\3\t\3\t\3\t\3\t\3\t\5\tI\n\t\3\n\3\n\3\n\3\n\3\13")
+        buf.write("\3\13\3\13\3\13\3\f\3\f\3\f\3\f\5\fW\n\f\3\f\2\2\r\2\4")
+        buf.write("\6\b\n\f\16\20\22\24\26\2\2\2]\2\32\3\2\2\2\4\34\3\2\2")
+        buf.write("\2\6$\3\2\2\2\b+\3\2\2\2\n-\3\2\2\2\f;\3\2\2\2\16A\3\2")
+        buf.write("\2\2\20H\3\2\2\2\22J\3\2\2\2\24N\3\2\2\2\26R\3\2\2\2\30")
+        buf.write("\33\5\4\3\2\31\33\5\22\n\2\32\30\3\2\2\2\32\31\3\2\2\2")
+        buf.write("\33\3\3\2\2\2\34\35\7\16\2\2\35\36\5\6\4\2\36\37\7\17")
+        buf.write("\2\2\37\5\3\2\2\2 !\5\n\6\2!\"\5\b\5\2\"%\3\2\2\2#%\3")
+        buf.write("\2\2\2$ \3\2\2\2$#\3\2\2\2%\7\3\2\2\2&\'\7\f\2\2\'(\5")
+        buf.write("\n\6\2()\5\b\5\2),\3\2\2\2*,\3\2\2\2+&\3\2\2\2+*\3\2\2")
+        buf.write("\2,\t\3\2\2\2-.\7\t\2\2./\7\r\2\2/\60\5\f\7\2\60\13\3")
+        buf.write("\2\2\2\61<\7\3\2\2\62<\7\4\2\2\63<\7\5\2\2\64<\7\6\2\2")
+        buf.write("\65<\7\7\2\2\66<\7\n\2\2\67<\7\b\2\28<\5\4\3\29<\5\22")
+        buf.write("\n\2:<\5\26\f\2;\61\3\2\2\2;\62\3\2\2\2;\63\3\2\2\2;\64")
+        buf.write("\3\2\2\2;\65\3\2\2\2;\66\3\2\2\2;\67\3\2\2\2;8\3\2\2\2")
+        buf.write(";9\3\2\2\2;:\3\2\2\2<\r\3\2\2\2=>\5\f\7\2>?\5\20\t\2?")
+        buf.write("B\3\2\2\2@B\3\2\2\2A=\3\2\2\2A@\3\2\2\2B\17\3\2\2\2CD")
+        buf.write("\7\f\2\2DE\5\f\7\2EF\5\20\t\2FI\3\2\2\2GI\3\2\2\2HC\3")
+        buf.write("\2\2\2HG\3\2\2\2I\21\3\2\2\2JK\7\20\2\2KL\5\16\b\2LM\7")
+        buf.write("\21\2\2M\23\3\2\2\2NO\7\22\2\2OP\5\16\b\2PQ\7\23\2\2Q")
+        buf.write("\25\3\2\2\2RV\7\13\2\2SW\5\4\3\2TW\5\24\13\2UW\3\2\2\2")
+        buf.write("VS\3\2\2\2VT\3\2\2\2VU\3\2\2\2W\27\3\2\2\2\t\32$+;AHV")
         return buf.getvalue()
 
 
@@ -51,13 +49,13 @@ class pysonParser ( Parser ):
     sharedContextCache = PredictionContextCache()
 
     literalNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
-                     "<INVALID>", "<INVALID>", "'ctx'", "<INVALID>", "<INVALID>", 
-                     "<INVALID>", "<INVALID>", "','", "':'", "'{'", "'}'", 
-                     "'['", "']'", "'('", "')'" ]
+                     "<INVALID>", "<INVALID>", "'self'", "<INVALID>", "<INVALID>", 
+                     "<INVALID>", "','", "':'", "'{'", "'}'", "'['", "']'", 
+                     "'('", "')'" ]
 
     symbolicNames = [ "<INVALID>", "INT", "FLOAT", "TRUE", "FALSE", "NONE", 
-                      "CTX", "KEY", "STRING", "OBJECT", "OBJECT_NAME", "COLON", 
-                      "COMMA", "LEFT_DICT", "RIGHT_DICT", "LEFT_LIST", "RIGHT_LIST", 
+                      "SELF", "KEY", "STRING", "OBJECT", "COLON", "COMMA", 
+                      "LEFT_DICT", "RIGHT_DICT", "LEFT_LIST", "RIGHT_LIST", 
                       "LEFT_BUKKET", "RIGHT_BUKKEFT", "LINE_COMMENT", "COMMENT", 
                       "WS" ]
 
@@ -83,29 +81,27 @@ class pysonParser ( Parser ):
     TRUE=3
     FALSE=4
     NONE=5
-    CTX=6
+    SELF=6
     KEY=7
     STRING=8
     OBJECT=9
-    OBJECT_NAME=10
-    COLON=11
-    COMMA=12
-    LEFT_DICT=13
-    RIGHT_DICT=14
-    LEFT_LIST=15
-    RIGHT_LIST=16
-    LEFT_BUKKET=17
-    RIGHT_BUKKEFT=18
-    LINE_COMMENT=19
-    COMMENT=20
-    WS=21
+    COLON=10
+    COMMA=11
+    LEFT_DICT=12
+    RIGHT_DICT=13
+    LEFT_LIST=14
+    RIGHT_LIST=15
+    LEFT_BUKKET=16
+    RIGHT_BUKKEFT=17
+    LINE_COMMENT=18
+    COMMENT=19
+    WS=20
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)
-        self.checkVersion("4.7.2")
+        self.checkVersion("4.7.1")
         self._interp = ParserATNSimulator(self, self.atn, self.decisionsToDFA, self.sharedContextCache)
         self._predicates = None
-
 
 
 
@@ -166,7 +162,6 @@ class pysonParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class Item_dictContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -216,7 +211,6 @@ class pysonParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class ItemsContext(ParserRuleContext):
 
@@ -275,7 +269,6 @@ class pysonParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Other_itemsContext(ParserRuleContext):
 
@@ -340,7 +333,6 @@ class pysonParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class ItemContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -391,7 +383,6 @@ class pysonParser ( Parser ):
             self.exitRule()
         return localctx
 
-
     class ValueContext(ParserRuleContext):
 
         def __init__(self, parser, parent:ParserRuleContext=None, invokingState:int=-1):
@@ -416,11 +407,8 @@ class pysonParser ( Parser ):
         def STRING(self):
             return self.getToken(pysonParser.STRING, 0)
 
-        def CTX(self):
-            return self.getToken(pysonParser.CTX, 0)
-
-        def OBJECT_NAME(self):
-            return self.getToken(pysonParser.OBJECT_NAME, 0)
+        def SELF(self):
+            return self.getToken(pysonParser.SELF, 0)
 
         def item_dict(self):
             return self.getTypedRuleContext(pysonParser.Item_dictContext,0)
@@ -453,7 +441,7 @@ class pysonParser ( Parser ):
         localctx = pysonParser.ValueContext(self, self._ctx, self.state)
         self.enterRule(localctx, 10, self.RULE_value)
         try:
-            self.state = 58
+            self.state = 57
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [pysonParser.INT]:
@@ -486,29 +474,24 @@ class pysonParser ( Parser ):
                 self.state = 52
                 self.match(pysonParser.STRING)
                 pass
-            elif token in [pysonParser.CTX]:
+            elif token in [pysonParser.SELF]:
                 self.enterOuterAlt(localctx, 7)
                 self.state = 53
-                self.match(pysonParser.CTX)
-                pass
-            elif token in [pysonParser.OBJECT_NAME]:
-                self.enterOuterAlt(localctx, 8)
-                self.state = 54
-                self.match(pysonParser.OBJECT_NAME)
+                self.match(pysonParser.SELF)
                 pass
             elif token in [pysonParser.LEFT_DICT]:
-                self.enterOuterAlt(localctx, 9)
-                self.state = 55
+                self.enterOuterAlt(localctx, 8)
+                self.state = 54
                 self.item_dict()
                 pass
             elif token in [pysonParser.LEFT_LIST]:
-                self.enterOuterAlt(localctx, 10)
-                self.state = 56
+                self.enterOuterAlt(localctx, 9)
+                self.state = 55
                 self.item_list()
                 pass
             elif token in [pysonParser.OBJECT]:
-                self.enterOuterAlt(localctx, 11)
-                self.state = 57
+                self.enterOuterAlt(localctx, 10)
+                self.state = 56
                 self.item_object()
                 pass
             else:
@@ -521,7 +504,6 @@ class pysonParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class ValuesContext(ParserRuleContext):
 
@@ -556,14 +538,14 @@ class pysonParser ( Parser ):
         localctx = pysonParser.ValuesContext(self, self._ctx, self.state)
         self.enterRule(localctx, 12, self.RULE_values)
         try:
-            self.state = 64
+            self.state = 63
             self._errHandler.sync(self)
             token = self._input.LA(1)
-            if token in [pysonParser.INT, pysonParser.FLOAT, pysonParser.TRUE, pysonParser.FALSE, pysonParser.NONE, pysonParser.CTX, pysonParser.STRING, pysonParser.OBJECT, pysonParser.OBJECT_NAME, pysonParser.LEFT_DICT, pysonParser.LEFT_LIST]:
+            if token in [pysonParser.INT, pysonParser.FLOAT, pysonParser.TRUE, pysonParser.FALSE, pysonParser.NONE, pysonParser.SELF, pysonParser.STRING, pysonParser.OBJECT, pysonParser.LEFT_DICT, pysonParser.LEFT_LIST]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 60
+                self.state = 59
                 self.value()
-                self.state = 61
+                self.state = 60
                 self.other_values()
                 pass
             elif token in [pysonParser.RIGHT_LIST, pysonParser.RIGHT_BUKKEFT]:
@@ -580,7 +562,6 @@ class pysonParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Other_valuesContext(ParserRuleContext):
 
@@ -618,16 +599,16 @@ class pysonParser ( Parser ):
         localctx = pysonParser.Other_valuesContext(self, self._ctx, self.state)
         self.enterRule(localctx, 14, self.RULE_other_values)
         try:
-            self.state = 71
+            self.state = 70
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [pysonParser.COLON]:
                 self.enterOuterAlt(localctx, 1)
-                self.state = 66
+                self.state = 65
                 self.match(pysonParser.COLON)
-                self.state = 67
+                self.state = 66
                 self.value()
-                self.state = 68
+                self.state = 67
                 self.other_values()
                 pass
             elif token in [pysonParser.RIGHT_LIST, pysonParser.RIGHT_BUKKEFT]:
@@ -644,7 +625,6 @@ class pysonParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Item_listContext(ParserRuleContext):
 
@@ -682,11 +662,11 @@ class pysonParser ( Parser ):
         self.enterRule(localctx, 16, self.RULE_item_list)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 73
+            self.state = 72
             self.match(pysonParser.LEFT_LIST)
-            self.state = 74
+            self.state = 73
             self.values()
-            self.state = 75
+            self.state = 74
             self.match(pysonParser.RIGHT_LIST)
         except RecognitionException as re:
             localctx.exception = re
@@ -695,7 +675,6 @@ class pysonParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Item_tupleContext(ParserRuleContext):
 
@@ -733,11 +712,11 @@ class pysonParser ( Parser ):
         self.enterRule(localctx, 18, self.RULE_item_tuple)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 77
+            self.state = 76
             self.match(pysonParser.LEFT_BUKKET)
-            self.state = 78
+            self.state = 77
             self.values()
-            self.state = 79
+            self.state = 78
             self.match(pysonParser.RIGHT_BUKKEFT)
         except RecognitionException as re:
             localctx.exception = re
@@ -746,7 +725,6 @@ class pysonParser ( Parser ):
         finally:
             self.exitRule()
         return localctx
-
 
     class Item_objectContext(ParserRuleContext):
 
@@ -785,17 +763,17 @@ class pysonParser ( Parser ):
         self.enterRule(localctx, 20, self.RULE_item_object)
         try:
             self.enterOuterAlt(localctx, 1)
-            self.state = 81
+            self.state = 80
             self.match(pysonParser.OBJECT)
-            self.state = 85
+            self.state = 84
             self._errHandler.sync(self)
             token = self._input.LA(1)
             if token in [pysonParser.LEFT_DICT]:
-                self.state = 82
+                self.state = 81
                 self.item_dict()
                 pass
             elif token in [pysonParser.LEFT_BUKKET]:
-                self.state = 83
+                self.state = 82
                 self.item_tuple()
                 pass
             elif token in [pysonParser.COLON, pysonParser.RIGHT_DICT, pysonParser.RIGHT_LIST, pysonParser.RIGHT_BUKKEFT]:

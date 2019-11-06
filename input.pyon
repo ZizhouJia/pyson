@@ -50,13 +50,10 @@ self.object和name1.name2和自注册object等同，都统称为object
 增添特殊字段@empty @pyson_name等
 */
 
+
 [{
     path:"checker.py",
-    exist:import@os.path.exists(self[0].path),
-    list:[1,2,import@os.path],
-    context:ctx
-}, #os.path]
-
-
-
-
+    exist:os.path.exists(self.0.path),
+    list:[1,2,os.path]@good,
+    context:self
+}, os.path]

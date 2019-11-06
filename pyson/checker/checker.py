@@ -115,12 +115,11 @@ class checker(object):
 
 class int_checker(checker):
     def __init__(self,min_value=None,max_value=None,default=empty,allow_none=False):
+        super(int_checker,self).__init__()
         self.min_value=min_value
         self.max_value=max_value
         self.default=default
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
-            raise RuntimeError("The defualt value is wrong "+str(default))
 
     def check_after(self,node,ctx):
         if(node is None and self.allow_none):
@@ -141,12 +140,11 @@ class int_checker(checker):
 
 class float_checker(checker):
     def __init__(self,min_value=None,max_value=None,default=empty,allow_none=False):
+        super(float_checker,self).__init__()
         self.min_value=min_value
         self.max_value=max_value
         self.default=default
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
-            raise RuntimeError("The defualt value is wrong "+str(default))
     
     def check_after(self,node,ctx):
         if(node is None and self.allow_none):
@@ -167,11 +165,10 @@ class float_checker(checker):
 
 class string_checker(checker):
     def __init__(self,pattern=None,default=empty,allow_none=False):
+        super(string_checker,self).__init__()
         self.pattern=pattern
         self.default=default
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
-            raise RuntimeError("The defualt value is wrong "+str(default))
 
     def check_after(self,node,ctx):
         if(node is None and self.allow_none):
@@ -184,11 +181,10 @@ class string_checker(checker):
             self.report_error("The input string should match the regular expression "+self.pattern)
 
 class bool_checker(checker):
-    def __init__(self,default=None,allow_none=False):
+    def __init__(self,default=empty,allow_none=False):
+        super(bool_checker,self).__init__()
         self.default=default
         self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
-            raise RuntimeError("The defualt value is wrong "+str(default))
     
     def check_after(self,node,ctx):
         if(node is None and self.allow_none):
@@ -197,40 +193,19 @@ class bool_checker(checker):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,bool)):
             self.report_error("Input type bool is expected but got "+str(type(node)))
-
-class object_name_checker(checker):
-    def __init__(self,pattern=None,default=None,allow_none=False):
-        self.pattern=pattern
-        self.default=default
-        self.allow_none=allow_none
-        if(not isinstance(self.default,empty_type) and not self.check_after(default,None)):
-            raise RuntimeError("The defualt value is wrong "+str(default))
-    
-    def check_after(self,node,ctx):
-        if(node is None and self.allow_none):
-            return
-        if(node is None):
-            self.report_error("The value should not be None, set the allow_none be True for None value")
-        if(not isinstance(node,pyson_object.pyson_object)):
-            self.report_error("Input type object is expected but got "+str(type(node)))
-        #match the pattern 
-        if(self.pattern is not None):
-            object=node.scope+"#"+node.object_name
-            if(re.match(self.pattern,object) is not None):
-                self.report_error("The input "+str(object)+" should match the regular expression "+self.pattern)
-
-
     
 class none_checker(checker):
     def __init__(self):
+        super(none_checker,self).__init__()
         pass
 
     def check_after(self,node,ctx):
         if(node is not None):
             self.report_error("The input should be None")
 
-class ctx_checker(checker):
+class self_checker(checker):
     def __init__(self,allow_none=False):
+        super(self_checker,self).__init__()
         self.allow_none=allow_none
 
     def check_before(self,node,raw_dict):
@@ -240,13 +215,14 @@ class ctx_checker(checker):
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(isinstance(node,pyson_object.pyson_object)):
-            if(node.object_name!="ctx"):
-                self.report_error("The input should be ctx")
+            if(node.object_name!="self"):
+                self.report_error("The input should be self")
         else:
-            self.report_error("The input should be ctx")
+            self.report_error("The input should be self")
 
 class object_checker(checker):
     def __init__(self,pattern=None,instance=True,allow_none=False):
+        super(object_checker,self).__init__()
         self.pattern=pattern
         self.instance=instance
         self.allow_none=allow_none
@@ -296,7 +272,8 @@ class object_checker(checker):
 # 2 The no constrain checker #solution add a no constrain checker for the object or set None
 # 3 The unlimit key #solution add a unlimit key option,default is closed
 class dict_checker(checker):
-    def __init__(self,scheme,optional=[],unlimit=False,allow_none=False):
+    def __init__(self,scheme=OrderedDict(),optional=[],unlimit=False,allow_none=False):
+        super(dict_checker,self).__init__()
         self.scheme=scheme
         self.optional=optional
         self.unlimit=unlimit
@@ -342,6 +319,7 @@ class dict_checker(checker):
 #the list checker for check list
 class list_checker(checker):
     def __init__(self,element_checker=None,max_numbers=-1,allow_none=False):
+        super(list_checker,self).__init__()
         self.element_checker=element_checker
         self.max_numbers=max_numbers
         self.allow_none=allow_none
@@ -392,6 +370,7 @@ class list_checker(checker):
 #enum type
 class enum_checker(checker):
     def __init__(self,enums=[],instance=True):
+        super(enum_checker,self).__init__()
         self.enums=enums
         self.instance=instance
         for i in range(0,len(self.enums)):
