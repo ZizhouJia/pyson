@@ -225,41 +225,51 @@ class transformer(object):
             current_store.append(obj_class[0])
             return
         #if the pyson_object.params is not none then check the obj_class[1]
-        try:
-            if(isinstance(pyson_object.params.value,dict)):
-                params={}
-                self._transform_dict(pyson_object.params,raw_dict,params,root_store,location+"#params",obj_class[1])
+        if(isinstance(pyson_object.params.value,dict)):
+            params={}
+            self._transform_dict(pyson_object.params,raw_dict,params,root_store,location+"#params",obj_class[1])
+            #if the params is wrong throw the exception
+            try:
                 obj=obj_class[0](**params)
                 current_store.append(obj)
+            except:
+                raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
+                location,origin_pyson_object.line,origin_pyson_object.column)
+            return
+        if(isinstance(pyson_object.params.value,list)):
+            if(obj_class[1] is None):
+                params_list=[]
+                self._transform_list(pyson_object.params,raw_dict,params_list,root_store,location+"#params",None)
+                try:
+                    obj=obj_class[0](*params_list)
+                    current_store.append(obj)
+                except:
+                    raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
+                    location,origin_pyson_object.line,origin_pyson_object.column)
                 return
-            if(isinstance(pyson_object.params.value,list)):
-                if(obj_class[1] is None):
-                    params_list=[]
-                    self._transform_list(pyson_object.params,raw_dict,params_list,root_store,location+"#params",None)
-                    obj=obj_class[0](*params_list)
+            else:
+                #special case for the params_list ,first it should be transformed in to dict
+                params_list=pyson_object.params.value
+                checker_dict=obj_class[1]
+                scheme=checker_dict.scheme
+                scheme_keys=list(scheme.key())
+                if(len(params_list)>len(scheme_keys)):
+                    raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
+                    location,origin_pyson_object.line,origin_pyson_object.column)
+                new_dict=OrderedDict()
+                for i in range(0,len(scheme_keys)):
+                    key=scheme_keys[i]
+                    new_dict[key]=params_list[i]
+                origin_pyson_object.value.params=new_dict
+                params_dict={}
+                self._transform_dict(origin_pyson_object,raw_dict,params_dict,root_store,location+"#params",scheme)
+                try:
+                    obj=obj_class[0](**params_dict)
                     current_store.append(obj)
-                    return
-                else:
-                    #special case for the params_list ,first it should be transformed in to dict
-                    params_list=pyson_object.params.value
-                    checker_dict=obj_class[1]
-                    scheme=checker_dict.scheme
-                    scheme_keys=list(scheme.key())
-                    if(len(params_list)>len(scheme_keys)):
-                        raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
-        location,origin_pyson_object.line,origin_pyson_object.column)
-                    new_dict=OrderedDict()
-                    for i in range(0,len(scheme_keys)):
-                        key=scheme_keys[i]
-                        new_dict[key]=params_list[i]
-                    origin_pyson_object.value.params=new_dict
-                    self._transform_dict(origin_pyson_object,raw_dict,params_list,root_store,location+"#params",scheme)
-                    obj=obj_class[0](*params_list)
-                    current_store.append(obj)
-                    return
-        except:
-            raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
-        location,origin_pyson_object.line,origin_pyson_object.column)
+                except:
+                    raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
+                    location,origin_pyson_object.line,origin_pyson_object.column)
+                return
         if(checker is not None):
             checker._check_after(pyson_object,root_store)
 

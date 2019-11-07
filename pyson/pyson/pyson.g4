@@ -31,7 +31,8 @@ values: value other_values|;
 other_values: COLON value other_values|;
 item_list: LEFT_LIST values RIGHT_LIST;
 item_tuple:LEFT_BUKKET values RIGHT_BUKKEFT;
-item_object: OBJECT (item_dict|item_tuple|);
+object_name: OBJECT|KEY;
+item_object: object_name (item_dict|item_tuple|);
 
 
 

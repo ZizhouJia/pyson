@@ -53,7 +53,10 @@ self.object和name1.name2和自注册object等同，都统称为object
 
 [{
     path:"checker.py",
+    path2:os,
     exist:os.path.exists(self.0.path),
-    list:[1,2,os.path]@good,
+    module:123,
+    //false_tragger:os.path.join(self.0.path,self.0.path2),
+    list:[1,2,self.0.module],
     context:self
 }, os.path]

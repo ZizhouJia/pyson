@@ -5,6 +5,7 @@ if __name__ is not None and "." in __name__:
 else:
     from pysonParser import pysonParser
 
+
 from collections import OrderedDict
 from . import pyson_object
 
@@ -182,7 +183,7 @@ class pysonListener(ParseTreeListener):
 
     # Exit a parse tree produced by pysonParser#item_object.
     def exitItem_object(self, ctx:pysonParser.Item_objectContext):
-        object_name=ctx.OBJECT().getText()
+        object_name=ctx.object_name().return_value.getText()
         scope=None
         name=None
         if('@' in object_name):
@@ -196,11 +197,25 @@ class pysonListener(ParseTreeListener):
             name=object_name
 
         if(ctx.item_dict() is not None):
-            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,ctx.item_dict().return_value),ctx.OBJECT())
+            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,ctx.item_dict().return_value),
+            ctx.object_name().return_value)
             return
         if(ctx.item_tuple() is not None):
-            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,ctx.item_tuple().return_value),ctx.OBJECT())
+            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,ctx.item_tuple().return_value),
+            ctx.object_name().return_value)
             return
-        ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,None),ctx.OBJECT())
+        ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,None),
+            ctx.object_name().return_value)
 
+    # Enter a parse tree produced by pysonParser#object_name.
+    def enterObject_name(self, ctx:pysonParser.Object_nameContext):
+        pass
 
+    # Exit a parse tree produced by pysonParser#object_name.
+    def exitObject_name(self, ctx:pysonParser.Object_nameContext):
+        if(ctx.OBJECT() is not None):
+            ctx.return_value=ctx.OBJECT()
+            return
+        if(ctx.KEY() is not None):
+            ctx.return_value=ctx.KEY()
+            return

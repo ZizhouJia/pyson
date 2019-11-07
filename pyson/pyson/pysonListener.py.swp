@@ -1,4 +1,4 @@
-# Generated from pyson.g4 by ANTLR 4.7.2
+# Generated from pyson.g4 by ANTLR 4.7.1
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .pysonParser import pysonParser
@@ -19,7 +19,6 @@ class pysonListener(ParseTreeListener):
         cont=pyson_object.content(value_type,value,self._element_number,token.symbol.line,token.symbol.column)
         self._element_number+=1
         return cont
-        
 
     # Enter a parse tree produced by pysonParser#entry_point.
     def enterEntry_point(self, ctx:pysonParser.Entry_pointContext):
@@ -50,13 +49,14 @@ class pysonListener(ParseTreeListener):
 
     # Exit a parse tree produced by pysonParser#items.
     def exitItems(self, ctx:pysonParser.ItemsContext):
-        if(ctx.isEmpty()):
+        if(ctx.item() is None):
             ctx.return_value=OrderedDict()
             return
         item_value=ctx.item().return_value
         others_value=ctx.other_items().return_value
         item_value.update(others_value)
         ctx.return_value=item_value
+
 
     # Enter a parse tree produced by pysonParser#other_items.
     def enterOther_items(self, ctx:pysonParser.Other_itemsContext):
@@ -113,17 +113,9 @@ class pysonListener(ParseTreeListener):
             token=ctx.STRING()
             ctx.return_value=self.set_value(str,str(ctx.STRING())[1:-1],token)
             return
-        if(ctx.CTX() is not None):
-            token=ctx.CTX()
-            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object("ctx",None),token)
-            return
-        if(ctx.OBJECT_NAME() is not None):
-            token=ctx.OBJECT_NAME()
-            text=str(token.getText())
-            text=text.split('#')
-            if(len(text[0])==0):
-                text[0]="default"
-            ctx.return_value=self.set_value(pyson_object.pyson_name,pyson_object.pyson_name(text[1],text[0]),token)
+        if(ctx.SELF() is not None):
+            token=ctx.SELF()
+            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object("","self",None),token)
             return
         if(ctx.item_dict() is not None):
             ctx.return_value=ctx.item_dict().return_value
@@ -134,7 +126,6 @@ class pysonListener(ParseTreeListener):
         if(ctx.item_object() is not None):
             ctx.return_value=ctx.item_object().return_value
             return
-
 
 
     # Enter a parse tree produced by pysonParser#values.
@@ -183,7 +174,8 @@ class pysonListener(ParseTreeListener):
     # Exit a parse tree produced by pysonParser#item_tuple.
     def exitItem_tuple(self, ctx:pysonParser.Item_tupleContext):
         ctx.return_value=self.set_value(list,ctx.values().return_value,ctx.LEFT_BUKKET())
-       
+
+
     # Enter a parse tree produced by pysonParser#item_object.
     def enterItem_object(self, ctx:pysonParser.Item_objectContext):
         pass
@@ -191,14 +183,24 @@ class pysonListener(ParseTreeListener):
     # Exit a parse tree produced by pysonParser#item_object.
     def exitItem_object(self, ctx:pysonParser.Item_objectContext):
         object_name=ctx.OBJECT().getText()
-        object_name=object_name.split('@')
-        if(len(object_name[0])==0):
-            object_name[0]="default"
+        scope=None
+        name=None
+        if('@' in object_name):
+            scope="name"
+            name=object_name[1:]
+        elif("self" in object_name):
+            scope="self"
+            name=object_name[5:]
+        else:
+            scope="import"
+            name=object_name
+
         if(ctx.item_dict() is not None):
-            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(object_name[1],object_name[0],ctx.item_dict().return_value),ctx.OBJECT())
+            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,ctx.item_dict().return_value),ctx.OBJECT())
             return
         if(ctx.item_tuple() is not None):
-            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(object_name[1],object_name[0],ctx.item_tuple().return_value),ctx.OBJECT())
+            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,ctx.item_tuple().return_value),ctx.OBJECT())
             return
-        ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(object_name[1],object_name[0],None),ctx.OBJECT())
-        
+        ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,None),ctx.OBJECT())
+
+
