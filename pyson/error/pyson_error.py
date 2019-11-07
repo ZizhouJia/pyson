@@ -7,7 +7,7 @@ class CheckWrongError(Exception):
         self.column=column
     
     def __str__(self):
-        return_value=self.location+":"+self.msg+" at ("+str(self.line)+","+str(self.column)+")"
+        return_value=self.msg+" at ("+str(self.location)+", "+str(self.line)+", "+str(self.column)+")"
         return str(return_value)
 
 class TransformWrongError(Exception):
@@ -17,15 +17,15 @@ class TransformWrongError(Exception):
         self.line=line
         self.column=column
     
-    def str(self):
-        return_value=self.location+":"+self.msg+" at ("+str(self.line)+","+str(self.column)+")"
+    def __str__(self):
+        return_value=self.msg+" at ("+str(self.location)+", "+str(self.line)+", "+str(self.column)+")"
         return str(return_value)
 
 class ReigistError(Exception):
     def __init__(self,msg):
         self.msg=msg
 
-    def str(self):
+    def __str__(self):
         return str(self.msg)
 
 class SyntaxErrorListener(antlr4.error.ErrorListener.ErrorListener):

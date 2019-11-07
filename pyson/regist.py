@@ -37,7 +37,18 @@ class register(object):
             return package
         except:
             return None
-
+    
+    def regist_warper(self,object_name,scheme=None):
+        def iner_warper(func):
+            self.regist(object_name,func,scheme)
+        return iner_warper
+    
+    def set_schemes_from_file(self,file_name):
+        from . import transform
+        scheme_list=transform.from_file(file_name)
+        for i in range(0,len(scheme_list)):
+            scheme_dict=scheme_list[i]
+            self.set_scheme(scheme_dict["name"],scheme_dict["scheme"])
 
 
 class object_name_utils(object):
