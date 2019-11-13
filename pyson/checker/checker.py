@@ -4,6 +4,8 @@ import pyson.pyson.pyson_object as pyson_object
 from collections import OrderedDict
 from pyson.error import CheckWrongError
 
+from inspect import isfunction
+
 class empty_type(object):
     def __init__(self):
         pass
@@ -74,7 +76,7 @@ def find_in_raw(raw_dict,object_name,element_number):
                 return cont
             
 
-class checker(object):
+class Checker(object):
     def __init__(self):
         self.default=None
         self.location=""
@@ -113,9 +115,9 @@ class checker(object):
 #关于None的问题，例如定义 min_value 首先min_value是optional，然后allow_none应该是False
 # 如果定义allow_none为True，那么则允许输入为None。如果default_value 为none则需要设定defualt_value 为 NoneType
 
-class int_checker(checker):
+class IntChecker(Checker):
     def __init__(self,min_value=None,max_value=None,default=empty,allow_none=False):
-        super(int_checker,self).__init__()
+        super(IntChecker,self).__init__()
         self.min_value=min_value
         self.max_value=max_value
         self.default=default
@@ -138,9 +140,9 @@ class int_checker(checker):
     def tips(self):
         return []
 
-class float_checker(checker):
+class FloatChecker(Checker):
     def __init__(self,min_value=None,max_value=None,default=empty,allow_none=False):
-        super(float_checker,self).__init__()
+        super(FloatChecker,self).__init__()
         self.min_value=min_value
         self.max_value=max_value
         self.default=default
@@ -163,9 +165,9 @@ class float_checker(checker):
     def tips(self):
         return []
 
-class string_checker(checker):
+class StringChecker(Checker):
     def __init__(self,pattern=None,default=empty,allow_none=False):
-        super(string_checker,self).__init__()
+        super(StringChecker,self).__init__()
         self.pattern=pattern
         self.default=default
         self.allow_none=allow_none
@@ -180,9 +182,9 @@ class string_checker(checker):
         if(self.pattern is not None and re.match(self.pattern,node) is None):
             self.report_error("The input string should match the regular expression "+self.pattern)
 
-class bool_checker(checker):
+class BoolChecker(Checker):
     def __init__(self,default=empty,allow_none=False):
-        super(bool_checker,self).__init__()
+        super(BoolChecker,self).__init__()
         self.default=default
         self.allow_none=allow_none
     
@@ -194,18 +196,18 @@ class bool_checker(checker):
         if(not isinstance(node,bool)):
             self.report_error("Input type bool is expected but got "+str(type(node)))
     
-class none_checker(checker):
+class NoneChecker(Checker):
     def __init__(self):
-        super(none_checker,self).__init__()
+        super(NoneChecker,self).__init__()
         pass
 
     def check_after(self,node,ctx):
         if(node is not None):
             self.report_error("The input should be None")
 
-class self_checker(checker):
+class SelfChecker(Checker):
     def __init__(self,allow_none=False):
-        super(self_checker,self).__init__()
+        super(SelfChecker,self).__init__()
         self.allow_none=allow_none
 
     def check_before(self,node,raw_dict):
@@ -220,16 +222,16 @@ class self_checker(checker):
         else:
             self.report_error("The input should be self")
 
-class object_checker(checker):
-    def __init__(self,pattern=None,instance=True,allow_none=False):
-        super(object_checker,self).__init__()
-        self.pattern=pattern
+class ObjectChecker(Checker):
+    def __init__(self,prefix=None,instance=True,allow_none=False):
+        super(ObjectChecker,self).__init__()
+        self.prefix=prefix
         self.instance=instance
         self.allow_none=allow_none
     
     def check_before(self,node,raw_dict):
-        node=node.value
         element_number=node.element_number
+        node=node.value
         if(node is None and self.allow_none):
             return
         if(node is None):
@@ -237,11 +239,16 @@ class object_checker(checker):
         if(not isinstance(node,pyson_object.pyson_object)):
             self.report_error("Input type object is expected but got "+str(type(node)))
         
-        #match the pattern 
-        if(self.pattern is not None):
-            object=node.scope+"@"+node.object_name
-            if(re.match(self.pattern,object) is not None):
-                self.report_error("The input "+str(object)+" should match the regular expression "+self.pattern)
+        if(node.scope!="name"):
+            self.report_error("Object name must begin with @")
+        #match the pattern,change the match the pattern
+        if(self.prefix is not None):
+            obj_name=node.object_name
+            if(obj_name==self.prefix):
+                return
+            if(obj_name.startswith(self.prefix+".")):
+                return
+            self.report_error("The input "+str(object)+" should match the regular expression "+self.pattern)
         
         #check if the element in the current dict
         if(node.scope=="self"):
@@ -271,10 +278,13 @@ class object_checker(checker):
 # 1 The optional key #solution add the optional setting
 # 2 The no constrain checker #solution add a no constrain checker for the object or set None
 # 3 The unlimit key #solution add a unlimit key option,default is closed
-class dict_checker(checker):
-    def __init__(self,scheme=OrderedDict(),optional=[],unlimit=False,allow_none=False):
-        super(dict_checker,self).__init__()
-        self.scheme=scheme
+class BaseDictChecker(Checker):
+    def __init__(self,checker_dict=None,optional=[],unlimit=False,allow_none=False):
+        super(BaseDictChecker,self).__init__()
+        if(checker_dict is None):
+            self.checker_dict=OrderedDict()
+        else:
+            self.checker_dict=checker_dict
         self.optional=optional
         self.unlimit=unlimit
         self.allow_none=allow_none
@@ -290,36 +300,110 @@ class dict_checker(checker):
         if(not isinstance(node,dict)):
             self.report_error("Input type dict is expected but got "+str(type(node)))
         #the node is a ordered dict
-        scheme_keys=list(self.scheme.keys())
+        scheme_keys=list(self.checker_dict.keys())
         node_dict_keys=list(node.keys())
         for i in range(0,len(node_dict_keys)):
             current_key=node_dict_keys[i]
             if(current_key not in scheme_keys and self.unlimit):
                 continue
             if(current_key not in scheme_keys):
-                self.report_error("Key "+str(current_key)+" not found in dict define")
-            item_checker=self.scheme[current_key]
-            del scheme_keys[current_key]
+                self.report_error("Key "+str(current_key)+" not found")
+            scheme_keys.remove(current_key)
         #if the key not appear in the node
         #it may have the default value or in the optional dict
         for i in range(0,len(scheme_keys)):
             current_key=scheme_keys[i]
             if(current_key in self.optional):
                 continue
-            item_checker=self.scheme[current_key]
+            item_checker=self.checker_dict[current_key]
             if(item_checker is None):
-                self.report_error("Key "+str(current_key)+" is required in dict define")
+                self.report_error("Key "+str(current_key)+" is required")
             default_value=item_checker.get_default()
             if(not isinstance(default_value,empty_type)):
                 node[current_key]=pyson_object.content(type(default_value),default_value,element_number,self.line,self.column)
                 continue
-            self.report_error("Key "+str(current_key)+" is required in dict define")
+            self.report_error("Key "+str(current_key)+" is required")
+    
+    def _sort_params_key(self,func):
+        sort_list=None
+        if(not isfunction(func)):
+            if(isinstance(func,type)):
+                func=func.__init__
+                sort_list=list(func.__code__.co_varnames)[1:]
+            else:
+                raise RuntimeError("The object is not callable")
+        else:
+            sort_list=list(func.__code__.co_varnames)
+        for value in list(self.checker_dict.keys()):
+            if(value not in sort_list):
+                raise RuntimeError("The key "+str(value)+" dones't appear in params list")
+        new_dict=OrderedDict()
+        for value in sort_list:
+            if(value in self.checker_dict.keys()):
+                new_dict[value]=self.checker_dict[value]
+        self.checker_dict=new_dict
+        new_dict_list=list(new_dict.keys())
+        for opt in self.optional:
+            if(opt not in new_dict_list):
+                raise RuntimeError("The "+str(opt)+" doesn't appear in dict key")
+            
+    
+
+class DictChecker(BaseDictChecker):
+    def __init__(self,checker_dict=None,optional=[],unlimit=False,allow_none=False):
+        super(DictChecker,self).__init__(checker_dict,optional,unlimit,allow_none)
+    
+    def add_checker(self,key_name,checker,optional=False):
+        if(key_name in self.checker_dict.keys()):
+            return
+        if(not isinstance(checker,Checker)):
+            raise RuntimeError("The checker must be the instace of Checker")
+        self.checker_dict[key_name]=checker
+        if(optional):
+            self.optional.append(key_name)
+
+class ParamsChecker(BaseDictChecker):
+    def __init__(self,checker_list=[],optional=[]):
+        self.checker_list=checker_list
+        self.optional_index_store=[]
+        super(ParamsChecker,self).__init__(OrderedDict(),optional,False,False)
+    
+    def _sort_params_key(self,func):
+        sort_list=None
+        if(not isfunction(func)):
+            if(isinstance(func,type)):
+                func=func.__init__
+                sort_list=list(func.__code__.co_varnames)[1:]
+            else:
+                raise RuntimeError("The object is not callable")
+        else:
+            sort_list=list(func.__code__.co_varnames)
+
+        if(len(sort_list)<len(self.checker_list)):
+            raise RuntimeError("The number of checkers is  more than the number of params")
+
+        for i in range(0,len(self.checker_list)):
+            param=sort_list[i]
+            self.checker_dict[param]=self.checker_list[i]
+
+        for index in self.optional_index_store:
+            self.optional.append(sort_list[index])
+
+        new_dict_list=list(self.checker_dict.keys())
+        for opt in self.optional:
+            if(opt not in new_dict_list):
+                raise RuntimeError("The "+str(opt)+" doesn't appear in dict key")
+
+    def add_checker(self,checker,optional=False):
+        self.checker_list.append(checker)
+        if(optional):
+            self.optional_index_store.append(len(self.checker_list)-1)
 
 
 #the list checker for check list
-class list_checker(checker):
+class ListChecker(Checker):
     def __init__(self,element_checker=None,max_numbers=-1,allow_none=False):
-        super(list_checker,self).__init__()
+        super(ListChecker,self).__init__()
         self.element_checker=element_checker
         self.max_numbers=max_numbers
         self.allow_none=allow_none
@@ -335,29 +419,30 @@ class list_checker(checker):
         for i in range(0,len(node)):
             element=node[i]
             if(not self._check_single_before(element,raw_dict)):
-                self.report_error("The input type doesn't satisify the list type requirement"+str(type(node)))
+                print(self.element_checker)
+                self.report_error("The input type doesn't satisify the list type requirement "+str(element.value))
     
     def check_after(self,node,ctx):
         for i in range(0,len(node)):
             element=node[i]
             if(not self._check_single_after(element,ctx)):
-                self.report_error("The input type doesn't satisify the list type requirement"+str(type(node)))
+                self.report_error("The input type doesn't satisify the list type requirement")
 
     
     def _check_single_before(self,element,raw_dict):
         if(self.element_checker is None):
             return True
         try:
-            element.check_before(element,ctx)
+            self.element_checker._check_before(element,raw_dict,self.location)
             return True
         except:
             return False
     
-    def _check_single_after(self,element,raw_dict):
+    def _check_single_after(self,element,ctx):
         if(self.element_checker is None):
             return True
         try:
-            element.check_after(element,ctx)
+            self.element_checker._check_after(element,ctx)
             return True
         except:
             return False
@@ -368,9 +453,9 @@ class list_checker(checker):
 
 
 #enum type
-class enum_checker(checker):
+class EnumChecker(Checker):
     def __init__(self,enums=[],instance=True):
-        super(enum_checker,self).__init__()
+        super(EnumChecker,self).__init__()
         self.enums=enums
         self.instance=instance
         for i in range(0,len(self.enums)):

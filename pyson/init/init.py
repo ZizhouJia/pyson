@@ -1,22 +1,24 @@
 #-*-coding:utf-8 -*-
-import pyson.regist as regist
 import pyson.transform as transform
-from . import checker
+import pyson.checker as checker
+import pyson.regist as regist
 
 import os
 
 def regist_checker():
+    
     reg=regist.reg
-    reg.regist("checker.int",checker.int_checker)
-    reg.regist("checker.float",checker.float_checker)
-    reg.regist("checker.string",checker.string_checker)
-    reg.regist("checker.bool",checker.bool_checker)
-    reg.regist("checker.none",checker.none_checker)
-    reg.regist("checker.self",checker.self_checker)
-    reg.regist("checker.object",checker.object_checker)
-    reg.regist("checker.dict",checker.dict_checker)
-    reg.regist("checker.list",checker.list_checker)
-    reg.regist("checker.enum",checker.enum_checker)
+    reg.regist_object("IntChecker",checker.IntChecker)
+    reg.regist_object("FloatChecker",checker.FloatChecker)
+    reg.regist_object("StringChecker",checker.StringChecker)
+    reg.regist_object("BoolChecker",checker.BoolChecker)
+    reg.regist_object("NoneChecker",checker.NoneChecker)
+    reg.regist_object("SelfChecker",checker.SelfChecker)
+    reg.regist_object("ObjectChecker",checker.ObjectChecker)
+    reg.regist_object("DictChecker",checker.DictChecker)
+    reg.regist_object("ListChecker",checker.ListChecker)
+    reg.regist_object("EnumChecker",checker.EnumChecker)
+    reg.regist_object("ParamsChecker",checker.ParamsChecker)
 
 def regist_checker_scheme():
     reg=regist.reg
@@ -26,7 +28,7 @@ def regist_checker_scheme():
     scheme_list=transform.from_file(file_name)
     for i in range(0,len(scheme_list)):
         scheme_dict=scheme_list[i]
-        reg.set_scheme(scheme_dict["name"],scheme_dict["scheme"])
+        reg.set_params_checker(scheme_dict["name"],scheme_dict["scheme"])
 
 regist_checker()
 regist_checker_scheme()

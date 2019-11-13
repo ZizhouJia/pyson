@@ -50,13 +50,161 @@ self.object和name1.name2和自注册object等同，都统称为object
 增添特殊字段@empty @pyson_name等
 */
 
+/*
+现在基本的语法已经完成
+checker的第一版也完成
+但是我对checker的语法并不满意
+主要有以下若干个方面
+checker 有两种添加方式，第一种是写pyson脚本，第二种是直接写python语言
+这两种方法不管哪一种都非常冗余
+checker还对两种类型做检验，第一种是pyson对象，是一个dict，第二种也是pyson对象，也是一个dict
+如果用 python语言写，这些方法的冗余度非常高，需要先定义checker_dict 然后OrderedDict，在OrderedDict里才能写dict脚本
+如果用 pyson脚本写，那么首先第一个问题是，pyson脚本不支持单个脚本的定义，因为单个脚本也是一个对象，pyson不支持解析单个对象
+第二个问题是，这种写法的冗余度也非常高，每次都需要定义额外的checker.dict不容易书写。
+最后，对于定义一个函数，我想并没有必要非要写复杂的pyson文件。
+我希望checker的的定义方法简单又明了
+*/
 
-[{
-    path:"checker.py",
-    path2:os,
-    exist:os.path.exists(self.0.path,2),
-    module:123,
-    //false_tragger:os.path.join(self.0.path,self.0.path2),
-    list:[1,2,self.0.module],
-    context:self
-}, os.path]
+/*
+我这里给出python端的解决策略
+我的大脑有些过热
+这里基本策略已经敲定，剩下的是如何命名的问题
+这里需要定义一个名称DictChecker
+*/
+
+/*
+另外需要额外给pyson scheme添加接口
+如何方便的添加接口也是个复杂的问题
+首先对于object，可以setCheckerForObject
+实际上每次让用户来指定checker并不科学
+transform的使用比较科学
+resgist_checker()
+get_checker("")
+*/
+
+/*
+现在的一个小问题是如何应对pyson对象本身的checker
+第一种方法，可以通过dict checker生成
+第二种方法，可以通过pyson定义，然而pyson定义不支持单个object
+pyson设计的原则是，pyson的语法本身尽可能独立，checker使用pyson表示固然好，不使用也可以
+在接口方面，只保留最基本的接口即可，不再提供和多组文件读取相关的接口
+另外需要提供一个内置的注册函数列表，以将已注册函数表示出来。
+*/
+
+/*统一不再提供文件读取支持*/
+
+/*
+还有一个小问题是元素的中间表示是一个ordered data，然而在转义以后，其结果是一个unordered data，然而在转义以后，其结果是一个unordered
+这样的话，function call的list形式的调用可能会发生错误。
+*/
+
+/*
+先假设我所希望的景象
+DictChecker用于在pyson文件中定义
+另外还有一个用户的dictChecker用于在文件中add_key
+
+最后还有一个paramsDictChecker用于无需变量名，添加自由约束
+另外我不希望有类似于Parse和重复传递参数的操作
+但是如果没有就需要额外的接口来解析
+
+DictChecker设计完，我就做测试
+tips功能可以以后再添加，这一块比较复杂
+
+现在再明确一下目标，我的主要目标是要做一个字符串传参的范式，对标的主要是json，不应该受到pyparser等的影响，在参数提示支持上不应该受到pyparser的影响
+
+现在线头有点多需要重新理顺一下
+
+首先pyson是本体，仅提供函数注册功能无任何约束
+然后是checker，提供对pyson语法的检验，检验可以使用pyson源语来写，也可以使用函数来编写，编写提供了特殊的接口，有点类似于pyparser
+但不同于pyparser，pyson不提供任何输入提示，输入仅应当符合pyson checker所定义的格式，这一点和xml scheme非常相像。
+但是pyson会提供checker提示api，但是这个不属于pyson的一部分。
+json base和pyparser base各有其优势。json base靠一个样例文件提供提示，pyparser base靠最简单的自动提示。
+另外json base的升级版是dict base，但是dict base必须要创建实例对象，函数书写也相对复杂，也不能在python的运行时来当做参数传递。
+pyson base解决一个痛点问题，面向对象的超参数表示，这一点任何base都不能比拟，另外对象的实例化时间完全由用户决定
+缺点是：
+与dict base相比需要注册函数，但是会提供更加清晰的表示方法。
+与json base相比语法相对复杂，但是这些都是必要的
+与pyparser base相比，没有语法提示，但有config文件示例，但是config文件不好编写，需要有一定的提示才能进行。
+优点也很明确，如果不考虑语法限制，pyson吊打pyparser base，考虑语法限制，pyson比pyparser在处理复杂参数上也清晰地多。
+
+所以pyson的优点很明显，在面向跨网络config文件传输上，xml和json完全不是对手，但是缺点是本语言仅限制于python，暂时没有扩展其他语言的打算。
+暂时希望服务的应用就是使用python编写的复杂的控制平台，例如深度学习自动训练平台。
+在面向深度学习模型配置上，pyson和dict base方法各有优劣，pyson更加具有条理性且提供了checker支持，另外不会立即实例化对象。dict base方法包含天然的语法提示
+整体来讲pyson仍然具有完全不可替代的作用
+pyson和pyparser方法也各有千秋，pyson可以设置极端复杂的和高层次的配置，pyparser则只能设置最简单的配置，同时还有复杂的if else语句的解析成本。
+缺点是pyparser天然带有语法提示，而pyson天然不具备语法提示，只能依赖于之前config文件的提示。在这里我对这个语言进行一个补全条例。
+*/
+
+/*
+明确了这些，下面规划一系列工作。
+首先由于测试的极端不适，必须增添两个userChecker接口
+然后需要对checker完成测试，然后尽快发布到github上，使用pip发布，并编写document
+后期有以下工作可以做
+1 改善pyson object的访问接口，整合dict和object访问两种方式
+2 考虑将注册checker机制，并和transform一起修改
+3 增添tips级联功能。
+4 在carpo平台上，整合第一个用pyson编写的分类项目
+5 在carpo平台上提供网页可视化支持。
+6 添加打印当前注册函数的接口
+*/
+
+/*对DictChecker作出更改，首先抽象出BaseDictChecker用作，DictChecker和ParamsChecker的基类
+DictChecker支持OrderedDict和UnOrderedDict, ParamsChecker支持List以及需要func
+*/
+
+/*实践中还是pysonfile比较香
+这里面如果可以直接传递func object会更香，但是直接传递function，有一定的危险性，想对的路径读取，不能保证，可以读取到函数
+另外解决了一个调用内置函数的问题，可以使用globals()来进行调用和查找
+另外我测试了importlib的调用，importlib的调用完全同步于当前的执行文件，所以具有一定的危险性
+
+最终解决方案是，简化注册函数，同时不使用非包的读取的方式，并添加globals() build in function的支持
+*/
+
+/*ParamsChecker 有两种实现方案，第一种是需要使用func来构造，第二种不需要function来构造
+第一种的好处是，构造出来的checker可以直接进行regist，同时更加符合逻辑，第二种的好处是，在构造params checker的时候无需再将函数名进行传递。
+*/
+
+/*暂不提供变长checker支持*/
+
+/*
+有一个小问题
+params的设定真的需要OrderedDict吗？
+是否有更加优秀的Params的checker设计
+理顺一下现有的设计，
+如果params传入了dict，那么就直接当作参数解析
+如果有简单的setParamsChecker接口，那么ParamsChecker也可以去除更改。
+另外DictChecker也可以根据所在的func排序。
+如果params传入了list，那么list先根据OrderedDict的顺序转换成OrderedDict再进行解析
+需要考虑一个问题，如果用户定义的Dict不符合顺序结构，如果Unlimit为False，且没有默认的参数，就报错
+如果用户定义的Dict不符合顺序结构，同时Unlimit为True，
+*/
+
+/*Object Checker如果使用正则表达式的话，语法匹配规则过于复杂，这里我打算使用
+相对简单的语法匹配规则，前缀语法匹配规则，只要begin with即可
+*/
+
+/*
+下面编写一个简单测试
+*/
+
+{
+    model:@nn.sequential([@nn.conv2d(3,16,3,1),@nn.conv2d(32,64,3,1),@nn.conv2d(64,128,3,1)]),
+    lr:0.01,
+    dataset:{
+        name: "mnist",
+        batch_size:32
+    }
+}
+
+/*
+下面涉及一些简单改进
+思考OrderedDict是否真的需要
+如果只是转译，不考虑checker，那么可以直接用dict
+如果是dictChecker可以直接用dict
+如果是参数checker，由于在注册中加入了排序机制，也可以直接用dict
+综上，所有的内容都可以用dict表示
+
+*/
+
+
+

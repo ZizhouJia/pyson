@@ -1,0 +1,10 @@
+[
+    {
+        name:"nn.conv2d",
+        checker:@ParamsChecker([@IntChecker(),@IntChecker(),@IntChecker(),@IntChecker(),@IntChecker()],["padding"])
+    },
+    {
+        name:"nn.sequential",
+        checker:@ParamsChecker([@ListChecker(@ObjectChecker("nn"))])
+    }
+]

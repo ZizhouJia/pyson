@@ -1,7 +1,8 @@
+from collections import OrderedDict
+
 from . import regist
 from . import pyson
 from antlr4 import *
-from collections import OrderedDict
 from pyson.error import TransformWrongError
 from pyson.error import SyntaxErrorListener
 
@@ -18,7 +19,6 @@ def intable(content):
     except:
         return False
 
-
 def obj_creater(pyson_dict,root_object=None,root_dict_id=None):
     if(root_dict_id==id(pyson_dict)):
         return root_object
@@ -32,7 +32,7 @@ def obj_creater(pyson_dict,root_object=None,root_dict_id=None):
             return_list.append(obj_creater(pyson_dict[i],root_object,root_dict_id))
         return return_list
     if(isinstance(pyson_dict,dict)):
-        current_obj=obj()
+        current_obj=Obj()
         if(root_object is None):
             root_object=current_obj
         current_obj.init(pyson_dict,current_obj,root_dict_id)
@@ -40,7 +40,7 @@ def obj_creater(pyson_dict,root_object=None,root_dict_id=None):
     return pyson_dict
 
 
-class obj(object):
+class Obj(object):
     def __init__(self):
         pass
 
@@ -57,7 +57,7 @@ class obj(object):
         if(value is None):
             stored_dict[prefix]=None
             return
-        if(isinstance(value,obj)):
+        if(isinstance(value,Obj)):
             for key,v in vars(value).items():
                 self._extract_obj_string(prefix+"."+str(key),v,stored_dict,root_id)
             return
@@ -86,7 +86,7 @@ class obj(object):
     
 
 
-class transformer(object):
+class Transformer(object):
     def __init__(self,reg):
         self.reg=reg
     
@@ -121,26 +121,28 @@ class transformer(object):
     #root_store is the root of the ctx  
     #row_dict is also should be used for checker input
     #the checker is also important
-    def _transform_list(self,current_list,raw_dict,current_store,root_store,location="",checker=None):
-        current_list=current_list.value
+    def _transform_list(self,content,raw_dict,current_store,root_store,location="",checker=None):
+        current_list=content.value
         if(checker is not None):
-            checker._check_before(current_list,raw_dict)
+            checker._check_before(content,raw_dict,location)
+        #get the obj_checker
+        obj_checker=None
+        if(checker is not None):
+            obj_checker=checker.element_checker
         for i in range(0,len(current_list)):
             #set current location
             current_location=location
             current_location=current_location+"."+str(i)
             #checker the type
-            if(isinstance(current_list[i].value,(int,float,bool,str))):
+            if(isinstance(current_list[i].value,(int,float,bool,str,type(None)))):
+                if(obj_checker is not None):
+                    obj_checker._check_before(current_list[i],raw_dict,location)
                 current_store.append(current_list[i].value)
-                continue
-            if(current_list[i].value is None):
-                current_store.append(None)
+                if(obj_checker is not None):
+                    obj_checker._check_after(current_store[i],root_store)
                 continue
             if(isinstance(current_list[i].value,pyson.pyson_object.pyson_object)):
                 store=[]
-                obj_checker=None
-                if(checker is not None):
-                    obj_checker=checker.element_checker
                 self._transform_object(current_list[i],raw_dict,store,root_store,current_location,obj_checker)
                 current_store.append(store[0])
                 continue
@@ -163,64 +165,64 @@ class transformer(object):
         if(checker is not None):
             checker._check_after(current_store,root_store)
 
-    def _transform_dict(self,current_dict,raw_dict,current_store,root_store,location="",checker=None):
-        current_dict=current_dict.value
+    def _transform_dict(self,content,raw_dict,current_store,root_store,location="",checker=None):
+        current_dict=content.value
         if(checker is not None):
-            checker._check_before(current_dict,raw_dict)
+            if(isinstance(checker,dict)):
+                from . import checker as ck
+                checker=ck.DictChecker(checker)
+            checker._check_before(content,raw_dict,location)
         for key,value in current_dict.items():
             #set error location
             current_location=location
             current_location=current_location+"."+str(key)
+            #get the checker
+            obj_checker=None
+            if(checker is not None):
+                obj_checker=checker.checker_dict[key]
             #check the type
-            if(isinstance(current_dict[key].value,(int,float,bool,str))):
+            if(isinstance(current_dict[key].value,(int,float,bool,str,type(None)))):
+                if(obj_checker is not None):
+                    obj_checker._check_before(current_dict[key],raw_dict,location)
                 current_store[key]=value.value
-                continue
-            if(current_dict[key].value is None):
-                current_store[key]=None
+                if(obj_checker is not None):
+                    obj_checker._check_after(current_store[key],root_store)
                 continue
             if(isinstance(current_dict[key].value,pyson.pyson_object.pyson_object)):
                 store=[]
-                obj_checker=None
-                if(checker is not None):
-                    obj_checker=checker.scheme[key]
                 self._transform_object(current_dict[key],raw_dict,store,root_store,current_location,obj_checker)
                 current_store[key]=store[0]
                 continue
             if(isinstance(current_dict[key].value,list)):
                 store=[]
                 current_store[key]=store
-                obj_checker=None
-                if(checker is not None):
-                    obj_checker=checker.scheme[key]
+                if(isinstance(obj_checker,str)):
+                    print(checker.checker_dict)
                 self._transform_list(current_dict[key],raw_dict,store,root_store,current_location,obj_checker)
                 continue
             if(isinstance(current_dict[key].value,dict)):
                 store={}
                 current_store[key]=store
-                obj_checker=None
-                if(checker is not None):
-                    obj_checker=checker.scheme[key]
                 self._transform_dict(current_dict[key],raw_dict,store,root_store,current_location,obj_checker)
                 continue
         if(checker is not None):
             checker._check_after(current_store,root_store)
 
 
-    def _transform_object(self,pyson_object,raw_dict,current_store,root_store,location="",checker=None):
-        origin_pyson_object=pyson_object
-        pyson_object=pyson_object.value
+    def _transform_object(self,content,raw_dict,current_store,root_store,location="",checker=None):
+        pyson_object=content.value
         if(checker is not None):
-            checker._check_before(pyson_object,raw_dict)
+            checker._check_before(content,raw_dict,location)
         if(pyson_object.object_name=="" and pyson_object.scope=="self"):
             current_store.append(root_store)
             return
         obj_class=self._get_object(pyson_object.object_name,pyson_object.scope,root_store)
         if(obj_class is None):
             raise TransformWrongError("The "+pyson_object.object_name+" can not be found",
-        location,origin_pyson_object.line,origin_pyson_object.column)
+        location,content.line,content.column)
         if(pyson_object.scope=="self" and pyson_object.params is not None):
             raise TransformWrongError("The self object can't be called",
-        location,origin_pyson_object.line,origin_pyson_object.column)
+        location,content.line,content.column)
         if(pyson_object.params is None):
             current_store.append(obj_class[0])
             return
@@ -234,7 +236,7 @@ class transformer(object):
                 current_store.append(obj)
             except:
                 raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
-                location,origin_pyson_object.line,origin_pyson_object.column)
+                location,content.line,content.column)
             return
         if(isinstance(pyson_object.params.value,list)):
             if(obj_class[1] is None):
@@ -244,46 +246,48 @@ class transformer(object):
                     obj=obj_class[0](*params_list)
                     current_store.append(obj)
                 except:
+                    print(params_list)
                     raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
-                    location,origin_pyson_object.line,origin_pyson_object.column)
+                    location,content.line,content.column)
                 return
             else:
                 #special case for the params_list ,first it should be transformed in to dict
                 params_list=pyson_object.params.value
-                checker_dict=obj_class[1]
-                scheme=checker_dict.scheme
-                scheme_keys=list(scheme.key())
+                dict_checker=obj_class[1]
+                scheme=dict_checker.checker_dict
+                scheme_keys=list(scheme.keys())
                 if(len(params_list)>len(scheme_keys)):
                     raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
-                    location,origin_pyson_object.line,origin_pyson_object.column)
-                new_dict=OrderedDict()
-                for i in range(0,len(scheme_keys)):
+                    location,content.line,content.column)
+                new_dict={}
+                for i in range(0,len(params_list)):
                     key=scheme_keys[i]
                     new_dict[key]=params_list[i]
-                origin_pyson_object.value.params=new_dict
+                content.value.params=new_dict
+                params_content=pyson.pyson_object.content(dict,new_dict,content.element_number,content.line,content.column)
                 params_dict={}
-                self._transform_dict(origin_pyson_object,raw_dict,params_dict,root_store,location+"#params",scheme)
+                self._transform_dict(params_content,raw_dict,params_dict,root_store,location+"#params",dict_checker)
                 try:
                     obj=obj_class[0](**params_dict)
                     current_store.append(obj)
                 except:
                     raise TransformWrongError("The params for object "+pyson_object.object_name+" is wrong",
-                    location,origin_pyson_object.line,origin_pyson_object.column)
+                    location,content.line,content.column)
                 return
         if(checker is not None):
             checker._check_after(pyson_object,root_store)
 
 
-    def transfrom(self,pyson_obj,checker=None):
-        if(isinstance(pyson_obj.value,dict)):
+    def transfrom(self,content,checker=None):
+        if(isinstance(content.value,dict)):
             root_store={}
             current_store=root_store
-            self._transform_dict(pyson_obj,pyson_obj,current_store,root_store,"self",checker)
+            self._transform_dict(content,content,current_store,root_store,"self",checker)
             return root_store
-        if(isinstance(pyson_obj.value,list)):
+        if(isinstance(content.value,list)):
             root_store=[]
             current_store=root_store
-            self._transform_list(pyson_obj,pyson_obj,current_store,root_store,"self",checker)
+            self._transform_list(content,content,current_store,root_store,"self",checker)
             return root_store
         else:
             return None
@@ -291,9 +295,14 @@ class transformer(object):
             
 
 reg=regist.reg
-trans=transformer(reg)
+trans=Transformer(reg)
 
-def from_file(file_name,checker=None):
+def from_file(file_name,checker_name=None):
+    checker=None
+    if(checker_name is not None):
+        checker=reg.get_checker(checker_name)
+        if(checker is None):
+            raise RuntimeError("The "+str(checker_name)+" can not be found")
     input=FileStream(file_name,encoding='utf-8')
     lexer=pyson.pysonLexer.pysonLexer(input)
     lexer.removeErrorListeners()
@@ -310,7 +319,12 @@ def from_file(file_name,checker=None):
     result=trans.transfrom(d,checker)
     return result
 
-def from_string(pyson_string,checker=None):
+def from_string(pyson_string,checker_name=None):
+    checker=None
+    if(checker_name is not None):
+        checker=reg.get_checker(checker_name)
+        if(checker is None):
+            raise RuntimeError("The "+str(checker_name)+" can not be found")
     input=InputStream(pyson_string)
     lexer=pyson.pysonLexer.pysonLexer(input)
     lexer.removeErrorListeners()
