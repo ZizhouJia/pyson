@@ -79,12 +79,12 @@ class Register(object):
     
     def __str__(self):
         output=""
-        output+="regist function:\n"
+        output+=" regist function:\n"
         for key in self._regist_object.keys():
-            output+=(str(key)+":"+str(self._regist_object[key])+"\n")
-        output+="regist pyson checker:\n"
+            output+=("  @"+str(key)+"\n")
+        output+=" regist pyson checker:\n"
         for key in self._regist_pyson_checker.keys():
-            output+=(str(key)+":"+str(self._regist_pyson_checker[key])+"\n")
+            output+=("  -"+str(key)+"\n")
         return output
 
 

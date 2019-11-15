@@ -1,4 +1,4 @@
-from collections import OrderedDict
+import re
 
 from . import regist
 from . import pyson
@@ -19,72 +19,60 @@ def intable(content):
     except:
         return False
 
-def obj_creater(pyson_dict,root_object=None,root_dict_id=None):
-    if(root_dict_id==id(pyson_dict)):
-        return root_object
-    if(root_dict_id is None):
-        root_dict_id=id(pyson_dict)
-    if(isinstance(pyson_dict,list)):
-        return_list=[]
-        if(root_object is None):
-            root_object=return_list
-        for i in range(0,len(pyson_dict)):
-            return_list.append(obj_creater(pyson_dict[i],root_object,root_dict_id))
-        return return_list
-    if(isinstance(pyson_dict,dict)):
-        current_obj=Obj()
-        if(root_object is None):
-            root_object=current_obj
-        current_obj.init(pyson_dict,current_obj,root_dict_id)
-        return current_obj
-    return pyson_dict
+class DotDict(dict):
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self,*args,**kwargs)
+        self.__dict__ = self
 
-
-class Obj(object):
-    def __init__(self):
-        pass
-
-    def init(self, d,root_object=None,root_dict_id=None):
-        for a, b in d.items():
-            setattr(self, a,obj_creater(b,root_object,root_dict_id))
-        
-    def _extract_obj_string(self,prefix,value,stored_dict,root_id=None):
-        if(root_id==id(value)):
-            stored_dict[prefix]=("self","self")
-            return
-        if(root_id is None):
-            root_id=id(self)
-        if(value is None):
-            stored_dict[prefix]=None
-            return
-        if(isinstance(value,Obj)):
-            for key,v in vars(value).items():
-                self._extract_obj_string(prefix+"."+str(key),v,stored_dict,root_id)
-            return
-        if(isinstance(value,list)):
-            for i in range(0,len(value)):
-                self._extract_obj_string(prefix+"."+str(i+1),value[i],stored_dict,root_id)
-            return
-        if(isinstance(value,(int,float,bool,str))):
-            stored_dict[prefix]=value
-        else:
-            stored_dict[prefix]=(type(value),str(value))
-
-    def __str__(self):
-        stored_dict={}
-        output_string=""
-        self._extract_obj_string("self",self,stored_dict)
-        for key,value in stored_dict.items():
-            output_string+=key
-            if(isinstance(value,tuple)):
-                output_string+=": ("
-                output_string+=str(value[0])+","+str(value[1])+")\n"
-            else:
-                output_string+=": "+str(value)
-                output_string+="\n"
-        return output_string
+def make_filting(content,checker,filter_list=None):
+    # the following has this conditions
+    # if unlimit is ture, it not influence the checker and the content
+    # we just remove the key in filter and the content
+    # the first condition is that the cut checker matchs the cut content
+    # the second condition is that the origin checker matchs the origin content
+    # the first condition is better
+    # 
+    pattern=r'^[A-Za-z_]+([A-Za-z0-9_])*$'
+    for element in filter_list:
+        if(re.match(pattern,element) is None):
+            raise RuntimeError("The "+element+" is not a key")
     
+    content_dict=content.value
+    if(not isinstance(content_dict,dict)):
+        raise RuntimeError("The filter operation is just for the dict")
 
+    #begin make filting
+    #the content
+    key_list=list(content_dict.keys())
+    for key in key_list:
+        if(key not in filter_list):
+            del content_dict[key]
+    
+    if(checker is None):
+        return content,checker
+    
+    from . import checker as ck
+    checker_dict=None
+    if(isinstance(checker,dict)):
+        checker_dict=checker
+    else:
+        if(not isinstance(checker,ck.DictChecker)):
+            raise RuntimeError("The checker is not the instance of DictChecker")
+        else:
+            checker_dict=checker.checker_dict
+    
+    #the checker
+    new_dict={}
+    key_list=list(checker_dict.keys())
+    for key in key_list:
+        if(key in filter_list):
+            new_dict[key]=checker_dict[key]
+    new_checker=None
+    if(isinstance(checker,dict)):
+        new_checker=ck.DictChecker(new_dict,[],False,False)
+    else:
+        new_checker=ck.DictChecker(new_dict,checker.optional,checker.unlimit,checker.allow_none)
+    return content,new_checker
 
 class Transformer(object):
     def __init__(self,reg):
@@ -155,7 +143,7 @@ class Transformer(object):
                 self._transform_list(current_list[i],raw_dict,store,root_store,current_location,obj_checker)
                 continue
             if(isinstance(current_list[i].value,dict)):
-                store={}
+                store=DotDict()
                 obj_checker=None
                 if(checker is not None):
                     obj_checker=checker.element_checker
@@ -201,7 +189,7 @@ class Transformer(object):
                 self._transform_list(current_dict[key],raw_dict,store,root_store,current_location,obj_checker)
                 continue
             if(isinstance(current_dict[key].value,dict)):
-                store={}
+                store=DotDict()
                 current_store[key]=store
                 self._transform_dict(current_dict[key],raw_dict,store,root_store,current_location,obj_checker)
                 continue
@@ -278,9 +266,9 @@ class Transformer(object):
             checker._check_after(pyson_object,root_store)
 
 
-    def transfrom(self,content,checker=None):
+    def transfrom(self,content,checker=None,dict_filter=[]):
         if(isinstance(content.value,dict)):
-            root_store={}
+            root_store=DotDict()
             current_store=root_store
             self._transform_dict(content,content,current_store,root_store,"self",checker)
             return root_store
@@ -297,7 +285,7 @@ class Transformer(object):
 reg=regist.reg
 trans=Transformer(reg)
 
-def from_file(file_name,checker_name=None):
+def from_file(file_name,checker_name=None,filter_list=None):
     checker=None
     if(checker_name is not None):
         checker=reg.get_checker(checker_name)
@@ -311,15 +299,20 @@ def from_file(file_name,checker_name=None):
     parser=pyson.pysonParser.pysonParser(token_stream)
     parser.removeErrorListeners()
     parser.addErrorListener(SyntaxErrorListener())
+    #time consuming
     tree=parser.entry_point()
+    ####
     listener=pyson.pysonListener.pysonListener()
     walker=ParseTreeWalker()
     walker.walk(listener,tree)
-    d=listener.return_value
-    result=trans.transfrom(d,checker)
+    content=listener.return_value
+    
+    if(filter_list is not None):
+        content,checker=make_filting(content,checker,filter_list)
+    result=trans.transfrom(content,checker)
     return result
 
-def from_string(pyson_string,checker_name=None):
+def from_string(pyson_string,checker_name=None,filter_list=None):
     checker=None
     if(checker_name is not None):
         checker=reg.get_checker(checker_name)
@@ -337,12 +330,10 @@ def from_string(pyson_string,checker_name=None):
     listener=pyson.pysonListener.pysonListener()
     walker=ParseTreeWalker()
     walker.walk(listener,tree)
-    d=listener.return_value
+    content=listener.return_value
+    if(filter_list is not None):
+        content,checker=make_filting(content,checker,filter_list)
     result=trans.transfrom(d,checker)
-    
+    result=trans.transfrom(d,checker)
     return result
-
-def to_object(pyson_dict):
-    return obj_creater(pyson_dict)
-
 

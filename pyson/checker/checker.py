@@ -1,16 +1,33 @@
 #-*-coding:utf-8 -*-
 import re
 import pyson.pyson.pyson_object as pyson_object
-from collections import OrderedDict
 from pyson.error import CheckWrongError
 
 from inspect import isfunction
 
-class empty_type(object):
+class Empty(object):
     def __init__(self):
         pass
 
-empty=empty_type()
+    def __str__(self):
+        return "'@Empty'"
+    
+    def __repr__(self):
+        return self.__str__()
+
+class PysonObjectName(object):
+    def __init__(self,object_name):
+        self.object_name=object_name
+    
+    def __str__(self):
+        output="'@PysonObjectName:"+self.object_name+"'"
+        return output
+    
+    def __repr__(self):
+        return self.__str__()
+
+
+empty=Empty()
 
 def intable(content):
     try:
@@ -78,7 +95,7 @@ def find_in_raw(raw_dict,object_name,element_number):
 
 class Checker(object):
     def __init__(self):
-        self.default=None
+        self.default=Empty()
         self.location=""
         self.line=0
         self.column=0
@@ -111,6 +128,23 @@ class Checker(object):
     
     def set_location(self,location):
         self.location=location
+    
+    def __str__(self):
+        output=""
+        output+="{ "
+        output+="'type': "+str(self.__class__.__name__)+", "
+        for name,value in vars(self).items(): 
+            if(name in ["location","line","column"]):
+                continue
+            output+="'"+str(name)+"': "+str(value)+", "
+        output=output[:-2]
+        output+="}"
+        return output
+    
+    def __repr__(self):
+        return self.__str__()
+    
+    
 
 #关于None的问题，例如定义 min_value 首先min_value是optional，然后allow_none应该是False
 # 如果定义allow_none为True，那么则允许输入为None。如果default_value 为none则需要设定defualt_value 为 NoneType
@@ -140,6 +174,8 @@ class IntChecker(Checker):
     def tips(self):
         return []
 
+        
+
 class FloatChecker(Checker):
     def __init__(self,min_value=None,max_value=None,default=empty,allow_none=False):
         super(FloatChecker,self).__init__()
@@ -161,9 +197,6 @@ class FloatChecker(Checker):
         if(self.max_value is not None):
             if(node>self.max_value):
                 self.report_error("The input value "+str(node)+" is bigger than the max_value "+str(self.min_value))
-    
-    def tips(self):
-        return []
 
 class StringChecker(Checker):
     def __init__(self,pattern=None,default=empty,allow_none=False):
@@ -282,7 +315,7 @@ class BaseDictChecker(Checker):
     def __init__(self,checker_dict=None,optional=[],unlimit=False,allow_none=False):
         super(BaseDictChecker,self).__init__()
         if(checker_dict is None):
-            self.checker_dict=OrderedDict()
+            self.checker_dict={}
         else:
             self.checker_dict=checker_dict
         self.optional=optional
@@ -319,7 +352,7 @@ class BaseDictChecker(Checker):
             if(item_checker is None):
                 self.report_error("Key "+str(current_key)+" is required")
             default_value=item_checker.get_default()
-            if(not isinstance(default_value,empty_type)):
+            if(not isinstance(default_value,Empty)):
                 node[current_key]=pyson_object.content(type(default_value),default_value,element_number,self.line,self.column)
                 continue
             self.report_error("Key "+str(current_key)+" is required")
@@ -337,17 +370,11 @@ class BaseDictChecker(Checker):
         for value in list(self.checker_dict.keys()):
             if(value not in sort_list):
                 raise RuntimeError("The key "+str(value)+" dones't appear in params list")
-        new_dict=OrderedDict()
-        for value in sort_list:
-            if(value in self.checker_dict.keys()):
-                new_dict[value]=self.checker_dict[value]
-        self.checker_dict=new_dict
-        new_dict_list=list(new_dict.keys())
+        dict_list=list(self.checker_dict.keys())
         for opt in self.optional:
-            if(opt not in new_dict_list):
+            if(opt not in dict_list):
                 raise RuntimeError("The "+str(opt)+" doesn't appear in dict key")
             
-    
 
 class DictChecker(BaseDictChecker):
     def __init__(self,checker_dict=None,optional=[],unlimit=False,allow_none=False):
@@ -366,7 +393,7 @@ class ParamsChecker(BaseDictChecker):
     def __init__(self,checker_list=[],optional=[]):
         self.checker_list=checker_list
         self.optional_index_store=[]
-        super(ParamsChecker,self).__init__(OrderedDict(),optional,False,False)
+        super(ParamsChecker,self).__init__({},optional,False,False)
     
     def _sort_params_key(self,func):
         sort_list=None

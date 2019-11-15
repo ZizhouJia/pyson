@@ -41,7 +41,7 @@ class pysonListener(ParseTreeListener):
 
     # Exit a parse tree produced by pysonParser#item_dict.
     def exitItem_dict(self, ctx:pysonParser.Item_dictContext):
-        ctx.return_value=ctx.return_value=self.set_value(list,ctx.items().return_value,ctx.LEFT_DICT())
+        ctx.return_value=ctx.return_value=self.set_value(dict,ctx.items().return_value,ctx.LEFT_DICT())
 
 
     # Enter a parse tree produced by pysonParser#items.

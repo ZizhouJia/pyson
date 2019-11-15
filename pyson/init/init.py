@@ -19,6 +19,8 @@ def regist_checker():
     reg.regist_object("ListChecker",checker.ListChecker)
     reg.regist_object("EnumChecker",checker.EnumChecker)
     reg.regist_object("ParamsChecker",checker.ParamsChecker)
+    reg.regist_object("PysonObjectName",checker.PysonObjectName)
+    reg.regist_object("Empty",checker.Empty)
 
 def regist_checker_scheme():
     reg=regist.reg

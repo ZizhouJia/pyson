@@ -102,5 +102,17 @@
             enums:@ListChecker(),
             instance:@BoolChecker()
         },["instance"])
+    },
+    //Empty
+    {
+        name:"Empty",
+        scheme:@DictChecker()
+    },
+    //PysonObjectName
+    {
+        name:"PysonObjectName",
+        scheme:@DictChecker({
+            object_name:@StringChecker()
+        })
     }
 ]

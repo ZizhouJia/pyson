@@ -193,7 +193,9 @@ params的设定真的需要OrderedDict吗？
     dataset:{
         name: "mnist",
         batch_size:32
-    }
+    },
+    array:[@IntChecker(),@IntChecker()],
+    another:@IntChecker()
 }
 
 /*
@@ -203,8 +205,100 @@ params的设定真的需要OrderedDict吗？
 如果是dictChecker可以直接用dict
 如果是参数checker，由于在注册中加入了排序机制，也可以直接用dict
 综上，所有的内容都可以用dict表示
-
 */
+
+/*
+考虑一些改进的点
+1 检查content定位机制
+2 检查更加复杂的checker和包含self引用
+3 把pyson_object更改一下，提供更加舒服的访问机制 (完成)
+4 提供更好的报错机制
+5 为checker提供级联的print机制 (完成)
+6 filter机制 (完成)
+*/
+
+/*
+先从简单的开始，更改pyson_object机制
+然后为checker增添级联print
+*/
+
+/*
+添加默认的几个关键词类 (完成)
+*/
+
+/*
+优化代码结构 (与content一致，待定，非必须)
+*/
+
+/*优化content，value不再是content的一个元素，而是content本身
+重点优化的有list,dict和object，
+int str bool float None等如果可以优化最好
+*/
+
+/*优化转换流程，先将内容翻译成content，然后transform可以指定翻译内容
+优化checker，checker的dict可以直接通过[]访问子checker
+*/
+
+/*考虑transfrom的参数传递
+checker可以直接使用string字符串 obj.obj.1来进行引用
+*/
+
+/*现在有两种方式，一种是pyson可以预加载，然后执行子模块，
+另外一种则是，pyson不允许预加载，直接全部编译并执行*/
+
+/*在这里我选择全部执行的方式，没有理由json可以整体执行，pyson却只能分步，分块执行*/
+
+/*content 本身其实并不影响模型的使用
+content 只在中间过程出现，在末尾过程不出现*/
+
+/*
+现在有一个非常复杂的问题
+执行的代码可以在任何时间被实例化
+json等object notation，由于其数据轻亮，这些数据哪怕全部被实例化也可以被接受
+然而在pyson中，如果一个pyson对应了多种情况，那么其他情况的对象也要被被迫实例化。
+在这个过程中，会有大量的无效object。然而这些都是必要的，删除任何一个部分都会破坏实例的有效性，除非加入if else 语句
+在这里我不打算增添任何其他的举动来增加语言的复杂性，可能唯一需要增添的是group设定。
+*/
+
+/*现在的pyson已经完全可以使用，
+剩下的工作主要是完善测试，以及增加一些设定来使得pyson更加易用。
+是否添加group？ 添加无论如何group都是有用的，哪怕仅仅是单个文件的解析
+*/
+
+/*梳理一下报错定位*/
+
+/*checker增添__str__函数*/
+
+/*思考一下怎么嫁接自动化页面渲染*/
+/*我觉得仿佛可以从checker __str__ 入手*/
+/*提供更好的报错机制依然是一个重头戏,首先是报错不宜冗杂，然后是报错必定位,尽量避免无法定位的错误*/
+
+/* 想对于group，更好的设计是filter，在pyson中，filter选中的元素被编译保留，filter未选中的元素被舍弃*/
+/* perfect 的解决方案 */
+/* 在这种情况下，filter对应的checker也需要被剪裁，来适应被剪裁的pyson object的需要 */
+/* 另外一个则是对list元素的处理，被剪裁的内容中包含了list，list经常会不固定长度，那么剪裁起来就相对有困难
+主要的问题是用户可能只有在知道list长度的情况下才能对pyson object进行合理的剪裁，
+然而实际上用户无法在转译pyson_object之前知道list的长度。*/
+
+0
+/*
+剩余代办项
+1）检查content定位机制，提供更准确的定位
+2）提供更好的报错机制，简单准确
+3）优化整体的代码结构(非必须)
+4）做更广泛的功能测试
+5）分析时间瓶颈（已经分析清楚，生成树的过程比较耗时）
+*/
+
+/* 对于content定位机制，需要先明确一下从什么地方开始梳理
+1）首先是pyson语法分析库，这个地方是定位的起点(Pass)
+2）然后是transform报错的地方，这个地方输出content的位置
+3）最后一个是checker，checker是checking大户*/
+
+
+
+
+
 
 
 

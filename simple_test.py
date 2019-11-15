@@ -21,3 +21,5 @@ def B(a=1):
 # print(isfunction(B))
 a=None
 print(isinstance(a,type(None)))
+
+dict
