@@ -197,11 +197,8 @@ params的设定真的需要OrderedDict吗？
         }
     },
     model:self.prefix.model,
-    lr:{
-        name:"mnist",
-        batch_size:self.prefix.dataset.name
-    },
-    dataset:self.lr
+    lr:self,
+    dataset:self.prefix.dataset
 }
 
 /*
@@ -359,6 +356,8 @@ Error存在一些问题，一方面我不希望输出太多的Error traceback，
 这些内容如果要做error report，包含有两个位置，但是checker只能report一个位置，即原位置。*/
 
 /*新的checker的代码已经完成*/
+
+/*功能性测试self的语法已经测试完成 */
 
 
 

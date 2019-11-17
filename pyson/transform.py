@@ -221,7 +221,7 @@ class Transformer(object):
                     current_store[key]=store
                     self._transform_dict(current_dict[key],raw_dict,store,root_store,current_location,obj_checker,instance)
                 else:
-                    self._transform_dict(current_dict[key],raw_dict,current_store[key],current_location,obj_checker,instance)
+                    self._transform_dict(current_dict[key],raw_dict,current_store[key],root_store,current_location,obj_checker,instance)
                 continue
         if(checker is not None):
             checker._check_after(current_store,root_store)
@@ -306,11 +306,16 @@ class Transformer(object):
     def _transform_self_check(self,content,raw_dict,current_store,root_store,location="",checker=None):
         checker=dict_warper(checker)
         obj=content.value
+        if(location=="self"):
+            if(checker is not None):
+                checker._check_before(content,raw_dict,location)
+                checker._check_after(current_store,root_store)
+            return 
         if(isinstance(obj,(int,float,bool,str,type(None)))):
             if(checker is not None):
                 checker._check_before(content,raw_dict,location)
                 checker._check_after(content.value,root_store)
-            return 
+            return
         if(isinstance(obj,pyson.pyson_object.pyson_object) and obj.scope!="self"):
             self._transform_object(content,raw_dict,[current_store],root_store,location,checker,False)
             return
@@ -325,7 +330,7 @@ class Transformer(object):
 
     def _index_item(self,index_string,raw_dict,root_store):
         if(index_string==""):
-            return root_store,raw_dict,"self."+index_string
+            return root_store,raw_dict,"self"
         indexs=index_string.split(".")
         current_indexing=root_store
         for index in indexs:
@@ -369,7 +374,7 @@ class Transformer(object):
         except Exception as e:
             error_accure=True
             reason=str(e)
-            # raise e
+            raise e
         if(error_accure):
             raise TransformWrongError("The 'self."+pyson_object.object_name+"' is wrong",
                         location,content.line,content.column,reason)
