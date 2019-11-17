@@ -29,21 +29,17 @@ for item in checkers:
 
 #Dict define the checker
 pyson_checker={
+    "prefix":DictChecker(unlimit=True),
     "model":ObjectChecker("nn.sequential"),
-    "lr":FloatChecker(),
+    "lr":None,
     "dataset":{
         "name":StringChecker(),
         "batch_size":IntChecker()
-    },
-    "array":ListChecker(),
-    "another":None
+    }
 }
 
 
 reg.regist_checker("nn_solver",pyson_checker)
-
-
-print(reg)
 
 
 starttime=time.time()

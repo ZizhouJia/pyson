@@ -4,7 +4,7 @@ import importlib
 import pkgutil
 from collections import OrderedDict
 
-from pyson.error import pyson_error
+from pyson.error import ReigistError
 import pyson.checker as c
 
 #change the register
@@ -16,14 +16,14 @@ class Register(object):
     
     def regist_object(self,object_name,obj,checker=None):
         if(object_name in self._regist_object.keys()):
-            raise pyson_error.ReigistError("The "+str(object_name)+" has already been used")
+            raise ReigistError("The "+str(object_name)+" has already been used")
         self._regist_object[object_name]=[obj,None]
         if(checker is not None):
             self.set_params_checker(object_name,checker)
     
     def set_params_checker(self,object_name,checker):
         if(object_name not in self._regist_object.keys()):
-            raise pyson_error.ReigistError("The "+str(object_name)+" is not been registed")
+            raise ReigistError("The "+str(object_name)+" is not been registed")
         func=self.get_object(object_name)[0]
         new_checker=None
         if(isinstance(checker,dict)):
@@ -84,7 +84,7 @@ class Register(object):
             output+=("  @"+str(key)+"\n")
         output+=" regist pyson checker:\n"
         for key in self._regist_pyson_checker.keys():
-            output+=("  -"+str(key)+"\n")
+            output+=("  @"+str(key)+"\n")
         return output
 
 

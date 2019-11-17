@@ -16,5 +16,3 @@ class content(object):
         self.element_number=element_number
         self.line=line
         self.column=column
-
-

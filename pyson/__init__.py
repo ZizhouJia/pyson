@@ -1,3 +1,4 @@
+from . import error
 from . import regist
 from . import transform
 from . import checker

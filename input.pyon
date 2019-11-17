@@ -188,14 +188,20 @@ params的设定真的需要OrderedDict吗？
 */
 
 {
-    model:@nn.sequential([@nn.conv2d(3,16,3,1),@nn.conv2d(32,64,3,1),@nn.conv2d(64,128,3,1)]),
-    lr:0.01,
-    dataset:{
-        name: "mnist",
-        batch_size:32
+    prefix:{
+        model:@nn.sequential([@nn.conv2d(3,16,3,1),@nn.conv2d(32,64,3,1),@nn.conv2d(64,128,3,1)]),
+        lr:0.1,
+        dataset:{
+            name: "mnist",
+            batch_size:32
+        }
     },
-    array:[@IntChecker(),@IntChecker()],
-    another:@IntChecker()
+    model:self.prefix.model,
+    lr:{
+        name:"mnist",
+        batch_size:self.prefix.dataset.name
+    },
+    dataset:self.lr
 }
 
 /*
@@ -283,8 +289,8 @@ json等object notation，由于其数据轻亮，这些数据哪怕全部被实�
 0
 /*
 剩余代办项
-1）检查content定位机制，提供更准确的定位
-2）提供更好的报错机制，简单准确
+1）检查content定位机制，提供更准确的定位（已完成）
+2）提供更好的报错机制，简单准确(完成)
 3）优化整体的代码结构(非必须)
 4）做更广泛的功能测试
 5）分析时间瓶颈（已经分析清楚，生成树的过程比较耗时）
@@ -292,8 +298,67 @@ json等object notation，由于其数据轻亮，这些数据哪怕全部被实�
 
 /* 对于content定位机制，需要先明确一下从什么地方开始梳理
 1）首先是pyson语法分析库，这个地方是定位的起点(Pass)
-2）然后是transform报错的地方，这个地方输出content的位置
-3）最后一个是checker，checker是checking大户*/
+2）然后是transform报错的地方，这个地方输出content的位置(Pass)
+3）最后一个是checker，checker是checking大户(Pass)
+检查过后感觉似乎没有什么地方可以完善，虽然没空间可以优化，但是感觉机制还不够强大，不过可以先放一放，暂且够用*/
+
+/* 目前报错机制主要是输出过于繁琐 */
+/* 在原理上部分报错机制无法进行定位*/
+
+/* 这里有一定的问题，首先定位不准，第二输出类型时输出为<class str> 不合理*/
+/* 先解决定位问题(Pass)*/
+
+/*经过调查采用return报错和raise报错结合的方式更有利于结果的展示*/
+/*在这里我打算在from_file的内部即handle住输出内容，然后在最后再raise error*/
+
+/*初步的策略是，函数承接信息，并handle指定的error，然后将error包装并raise出去*/
+/*下面分若干步
+1) 将error从原有的代码结构中提取出来，放置到代码的外部
+2) 更改from_file 和from_string 将信息进行封装，分为4类抛出
+4) 修改from_file 和from_string 的代码结构
+*/
+
+/*
+Error存在一些问题，一方面我不希望输出太多的Error traceback，另外一方面
+*/
+
+/*考虑一个基本问题，如果一个对象不希望被实例化怎么办
+在这里对不希望实例化的对象使用object checker的非instance 版本进行约束*/
+
+//明天跑通程序，
+//pyson做更多测试，并考虑antlr速度优化
+//准备发布github
+
+//做self级的测试
+
+//修复transform中的bug
+
+/*我想 关于self的策略需要被修改，目前的策略不能满足要求
+1）self被单独分立出来作为一个特殊的类型
+2）self被被拿出来，然后根据self索引之前的元素获取node和转义后的value
+3）如果node不是一个self类型，例如dict,那么就先递归check before再递归check after
+*/
+
+/*有一个需要区分的点是self是否允许function call，
+如果允许首先需要确认当前检测的object是否已经被实例化
+如果没有被实例化，那么需要再调用检测*/
+
+/*self是否有function call的意义呢？
+如果可以，self是否可以被反复使用？ 如果self传递到function中，无意中self中的内容发生了改变
+比如self不再是原来的self，这种情况是否应该被考虑？
+如果self可以被function call 在生成器这种情况中，这种操作非常不安全，没有保障
+有没有self 做function call 而不做function call不能做的事情。
+想不到，我暂且认为self做function call没有任何意义*/
+
+/*考虑从根部分立出self语法，没有这个折腾的必要*/
+
+/*考虑在transform阶段分立出self*/
+
+/*考虑如何设计self的reference的location，location有两个
+一个是调用self的location，一个是被引用的原位置的location
+这些内容如果要做error report，包含有两个位置，但是checker只能report一个位置，即原位置。*/
+
+/*新的checker的代码已经完成*/
 
 
 

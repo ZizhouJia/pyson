@@ -5,6 +5,21 @@ from pyson.error import CheckWrongError
 
 from inspect import isfunction
 
+
+
+def intable(content):
+    try:
+        int(content)
+        return True
+    except:
+        return False
+
+def get_type_name(node):
+    type_name=str(type(node))
+    type_name=type_name.split()[1][1:-2]
+    return type_name
+
+
 class Empty(object):
     def __init__(self):
         pass
@@ -15,6 +30,8 @@ class Empty(object):
     def __repr__(self):
         return self.__str__()
 
+empty=Empty()
+
 class PysonObjectName(object):
     def __init__(self,object_name):
         self.object_name=object_name
@@ -24,74 +41,7 @@ class PysonObjectName(object):
         return output
     
     def __repr__(self):
-        return self.__str__()
-
-
-empty=Empty()
-
-def intable(content):
-    try:
-        int(content)
-        return True
-    except:
-        return False
-
-def find_in_raw(raw_dict,object_name,element_number):
-    def _find_in_raw(raw_dict,object_name):
-        current_ctx=raw_dict
-        keys=object_name.split(".")
-        for key in keys:
-            if(intable(key)):
-                if(isinstance(current_ctx.value,list)):
-                    if(int(key)>=len(current_ctx.value)):
-                        return None
-                    current_ctx=current_ctx.value[int(key)]
-                    continue
-                return None
-            else:
-                if(isinstance(current_ctx.value,dict)):
-                    if(key in current_ctx.value.keys()):
-                        current_ctx=current_ctx.value[key]
-                        continue
-                    else:
-                        return None
-                return None
-        return current_ctx
-    search_obj_type=False
-    params=None
-    while(True):
-        current_ctx=_find_in_raw(raw_dict,object_name)
-        if(current_ctx is None):
-            return None
-        if(not isinstance(current_ctx.value,pyson_object.pyson_object)):
-            return None
-        obj=current_ctx.value
-        if(not search_obj_type):
-            if(obj.scope=="self" and obj.params is None):
-                if(current_ctx.element_number>=element_number):
-                    return None
-                element_number=obj.element_number
-                current_ctx=_find_in_raw(raw_dict,obj.object_name)
-            if(obj.scope!="self"):
-                if(current_ctx.element_number>=element_number):
-                    return None
-                return current_ctx
-            if(obj.scope=="self" and obj.params is not None):
-                search_obj_type=True
-                params=obj.params
-                element_number=obj.element_number
-                current_ctx=_find_in_raw(raw_dict,obj.object_name)
-        else:
-            if(obj.params is not None):
-                return None
-            if(obj.scope=="self"):
-                element_number=obj.element_number
-                current_ctx=_find_in_raw(raw_dict,obj.object_name)
-            if(obj.scope!="self"):
-                pys_obj=pyson_object.pyson_object(obj.object_name,obj.scope,params)
-                cont=pyson_object.content(current_ctx.type,pys_obj,element_number,current_ctx.line,current_ctx.column)
-                return cont
-            
+        return self.__str__()        
 
 class Checker(object):
     def __init__(self):
@@ -163,7 +113,7 @@ class IntChecker(Checker):
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,int)):
-            self.report_error("Input type int is expected but got "+str(type(node)))
+            self.report_error("Input type 'int' is expected but got '"+get_type_name(node)+"'")
         if(self.min_value is not None):
             if(node<self.min_value):
                 self.report_error("The input value "+str(node)+" is smaller than the min_value "+str(self.min_value))
@@ -190,7 +140,7 @@ class FloatChecker(Checker):
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,(int,float))):
-            self.report_error("Input type float is expected but got "+str(type(node)))
+            self.report_error("Input type float is expected but got "+get_type_name(node))
         if(self.min_value is not None):
             if(node<self.min_value):
                 self.report_error("The input value "+str(node)+" is smaller than the min_value "+str(self.min_value))
@@ -211,7 +161,7 @@ class StringChecker(Checker):
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,str)):
-            self.report_error("Input type str is expected but got "+str(type(node)))
+            self.report_error("Input type str is expected but got "+get_type_name(node))
         if(self.pattern is not None and re.match(self.pattern,node) is None):
             self.report_error("The input string should match the regular expression "+self.pattern)
 
@@ -227,7 +177,7 @@ class BoolChecker(Checker):
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,bool)):
-            self.report_error("Input type bool is expected but got "+str(type(node)))
+            self.report_error("Input type 'bool' is expected but got '"+get_type_name(node)+"'")
     
 class NoneChecker(Checker):
     def __init__(self):
@@ -263,14 +213,13 @@ class ObjectChecker(Checker):
         self.allow_none=allow_none
     
     def check_before(self,node,raw_dict):
-        element_number=node.element_number
         node=node.value
         if(node is None and self.allow_none):
             return
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,pyson_object.pyson_object)):
-            self.report_error("Input type object is expected but got "+str(type(node)))
+            self.report_error("Input type 'object' is expected but got '"+get_type_name(node)+"'")
         
         if(node.scope!="name"):
             self.report_error("Object name must begin with @")
@@ -281,25 +230,7 @@ class ObjectChecker(Checker):
                 return
             if(obj_name.startswith(self.prefix+".")):
                 return
-            self.report_error("The input "+str(object)+" should match the regular expression "+self.pattern)
-        
-        #check if the element in the current dict
-        if(node.scope=="self"):
-            prev_node=find_in_raw(raw_dict,node.object_name,element_number)
-            if(prev_node is None):
-                self.report_error("The "+node.object_name+" could not be found")
-            if(not self.instance):
-                if(node.params is not None):
-                    self.report_error("The object is an instance type, set the instance be True")
-                if(prev_node.params is not None):
-                    self.report_error("The object is an instance type, set the instance be True")
-                return
-            else:
-                if(node.params is not None and prev_node.params is not None):
-                    self.report_error("The multiple calls")
-                if(node.params is None and prev_node.params is None):
-                    self.report_error("The object should not be instanced, set the instance be False")
-                return
+            self.report_error("The input "+str(object)+" should match the regular expression "+self.prefix)
 
     def get_default(self):
         if(self.instance):
@@ -331,7 +262,7 @@ class BaseDictChecker(Checker):
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,dict)):
-            self.report_error("Input type dict is expected but got "+str(type(node)))
+            self.report_error("Input type 'dict' is expected but got '"+get_type_name(node)+"'")
         #the node is a ordered dict
         scheme_keys=list(self.checker_dict.keys())
         node_dict_keys=list(node.keys())
@@ -364,7 +295,7 @@ class BaseDictChecker(Checker):
                 func=func.__init__
                 sort_list=list(func.__code__.co_varnames)[1:]
             else:
-                raise RuntimeError("The object is not callable")
+                raise RuntimeError("The object is not callable, the checker should not been registered")
         else:
             sort_list=list(func.__code__.co_varnames)
         for value in list(self.checker_dict.keys()):
@@ -402,7 +333,7 @@ class ParamsChecker(BaseDictChecker):
                 func=func.__init__
                 sort_list=list(func.__code__.co_varnames)[1:]
             else:
-                raise RuntimeError("The object is not callable")
+                raise RuntimeError("The object is not callable, the checker should not been registered")
         else:
             sort_list=list(func.__code__.co_varnames)
 
@@ -442,7 +373,7 @@ class ListChecker(Checker):
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
         if(not isinstance(node,list)):
-            self.report_error("Input type list is expected but got "+str(type(node)))
+            self.report_error("Input type 'list' is expected but got '"+get_type_name(node)+"'")
         for i in range(0,len(node)):
             element=node[i]
             if(not self._check_single_before(element,raw_dict)):
