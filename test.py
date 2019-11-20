@@ -43,7 +43,7 @@ reg.regist_checker("nn_solver",pyson_checker)
 
 
 starttime=time.time()
-result=pyson.from_file("input.pyon","nn_solver")
+result=pyson.from_file("input.pyson","nn_solver")
 endtime = time.time()
 print("pyson load %.8f"%(endtime-starttime))
 print(result)

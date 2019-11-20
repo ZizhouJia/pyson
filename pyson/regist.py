@@ -25,16 +25,8 @@ class Register(object):
         if(object_name not in self._regist_object.keys()):
             raise ReigistError("The "+str(object_name)+" is not been registed")
         func=self.get_object(object_name)[0]
-        new_checker=None
-        if(isinstance(checker,dict)):
-            new_checker=c.DictChecker(checker)
-        elif(isinstance(checker,(c.DictChecker,c.ParamsChecker))):
-            new_checker=checker
-        else:
-           raise RuntimeError("The checker type is wrong")
-        new_checker._sort_params_key(func)
-        self._regist_object[object_name][1]=new_checker
-
+        checker=self._warp_checker_dict(checker)
+        checker._sort_params_key(func)
         self._regist_object[object_name][1]=checker
         
     def get_object(self,object_name):
@@ -64,14 +56,36 @@ class Register(object):
         return iner_warper
     
     def regist_checker(self,name,checker):
-        import pyson.checker as c
         if(name not in self._regist_pyson_checker):
-            if(not isinstance(checker,(dict,c.DictChecker,c.ListChecker))):
-                raise RuntimeError("The checker type is wrong")
+            checker=self._warp_checker_dict(checker)
             self._regist_pyson_checker[name]=checker
         else:
-            raise pyson_error.ReigistError("The "+str(name)+" has already been registed")
+            raise ReigistError("The "+str(name)+" has already been registed")
     
+    def _warp_checker_dict(self,current_checker):
+        if(isinstance(current_checker,dict)):
+            for key in current_checker.keys():
+                current_checker[key]=self._warp_checker_dict(current_checker[key])
+            return c.DictChecker(current_checker)
+        if(isinstance(current_checker,c.DictChecker)):
+            checker_dict=current_checker.checker_dict
+            for key in checker_dict.keys():
+                checker_dict[key]=self._warp_checker_dict(checker_dict[key])
+            return current_checker
+        if(isinstance(current_checker,c.ParamsChecker)):
+            checker_list=current_checker.checker_list
+            for i in range(0,len(checker_list)):
+                checker_list[i]=self._warp_checker_dict(checker_list[i])
+            return current_checker
+        if(isinstance(current_checker,c.checker.Checker)):
+            return current_checker
+        
+        if(current_checker is None):
+            return current_checker
+        
+        raise RuntimeError("The checker format is wrong")
+
+        
     def get_checker(self,name):
         if(name not in self._regist_pyson_checker):
             return None
@@ -87,18 +101,7 @@ class Register(object):
             output+=("  @"+str(key)+"\n")
         return output
 
-
-
 reg=Register()
-
-#checker代表了一组预先定义好的函数检测器
-#scheme代表了checker的实例，用于检测函数的参数格式，或是检测pyson_object的格式
-
-
-#从最基本的开始
-#首先是定义checker的scheme，这一组scheme也是使用checker来进行定义，这个时候checker都没有约束性scheme，checker可以任意指定
-#然后将checker和对应的scheme都注册到regist中去
-#然后再注册pyson_object的scheme，使用
 
 
 

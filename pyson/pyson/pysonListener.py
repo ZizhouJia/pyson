@@ -7,7 +7,7 @@ else:
 
 
 from collections import OrderedDict
-from . import pyson_object
+from . import regist_object
 
 # This class defines a complete listener for a parse tree produced by pysonParser.
 class pysonListener(ParseTreeListener):
@@ -17,7 +17,7 @@ class pysonListener(ParseTreeListener):
         self._element_number=0
     
     def set_value(self,value_type,value,token):
-        cont=pyson_object.content(value_type,value,self._element_number,token.symbol.line,token.symbol.column)
+        cont=regist_object.Content(value_type,value,self._element_number,token.symbol.line,token.symbol.column)
         self._element_number+=1
         return cont
 
@@ -116,7 +116,7 @@ class pysonListener(ParseTreeListener):
             return
         if(ctx.SELF() is not None):
             token=ctx.SELF()
-            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object("","self",None),token)
+            ctx.return_value=self.set_value(regist_object.RegistObject,regist_object.RegistObject("","self",None),token)
             return
         if(ctx.item_dict() is not None):
             ctx.return_value=ctx.item_dict().return_value
@@ -197,14 +197,14 @@ class pysonListener(ParseTreeListener):
             name=object_name
 
         if(ctx.item_dict() is not None):
-            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,ctx.item_dict().return_value),
+            ctx.return_value=self.set_value(regist_object.RegistObject,regist_object.RegistObject(name,scope,ctx.item_dict().return_value),
             ctx.object_name().return_value)
             return
         if(ctx.item_tuple() is not None):
-            ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,ctx.item_tuple().return_value),
+            ctx.return_value=self.set_value(regist_object.RegistObject,regist_object.RegistObject(name,scope,ctx.item_tuple().return_value),
             ctx.object_name().return_value)
             return
-        ctx.return_value=self.set_value(pyson_object.pyson_object,pyson_object.pyson_object(name,scope,None),
+        ctx.return_value=self.set_value(regist_object.RegistObject,regist_object.RegistObject(name,scope,None),
             ctx.object_name().return_value)
 
     # Enter a parse tree produced by pysonParser#object_name.

@@ -8,6 +8,7 @@
 第一种，只保留dict用法
 第二种，添加list用法
 第三种，添加=号用法
+(finish)
 */
 
 
@@ -21,6 +22,7 @@
 (6) 引用方法由例如 self.1.name 更改为self[1].name 符合python规范，self引用的关键词不能再进行call，scheme要对self引用的关键词来进行检测
 (7) reg中增添选项禁用python固有库的调用
 (8) 将pyson_name等关键词更改为pyson固有固件
+(finish)
 */
 
 /*
@@ -31,12 +33,14 @@
 (4) 产生的对象类型的结果叫做 pyson object
 (5) 整个语言范式叫做pyson
 (6) 补充：所有的实例统称object，对object的调用称为object call
+(undo)
 */
 
 /*
 下面对scheme做出规范
 scheme仅针对于自注册的function
 对self对象和调用以及默认的函数调用不做要求
+(finish)
 */
 
 /*
@@ -44,10 +48,12 @@ scheme仅针对于自注册的function
 self是一种独立的关键词
 self.object和name1.name2和自注册object等同，都统称为object
 取消object name
+(finish)
 */
 
 /*
 增添特殊字段@empty @pyson_name等
+(finish)
 */
 
 /*
@@ -63,6 +69,7 @@ checker还对两种类型做检验，第一种是pyson对象，是一个dict，�
 第二个问题是，这种写法的冗余度也非常高，每次都需要定义额外的checker.dict不容易书写。
 最后，对于定义一个函数，我想并没有必要非要写复杂的pyson文件。
 我希望checker的的定义方法简单又明了
+(finish)
 */
 
 /*
@@ -70,6 +77,7 @@ checker还对两种类型做检验，第一种是pyson对象，是一个dict，�
 我的大脑有些过热
 这里基本策略已经敲定，剩下的是如何命名的问题
 这里需要定义一个名称DictChecker
+(finish)
 */
 
 /*
@@ -80,6 +88,7 @@ checker还对两种类型做检验，第一种是pyson对象，是一个dict，�
 transform的使用比较科学
 resgist_checker()
 get_checker("")
+(finish)
 */
 
 /*
@@ -89,6 +98,7 @@ get_checker("")
 pyson设计的原则是，pyson的语法本身尽可能独立，checker使用pyson表示固然好，不使用也可以
 在接口方面，只保留最基本的接口即可，不再提供和多组文件读取相关的接口
 另外需要提供一个内置的注册函数列表，以将已注册函数表示出来。
+(finish)
 */
 
 /*统一不再提供文件读取支持*/
@@ -96,6 +106,7 @@ pyson设计的原则是，pyson的语法本身尽可能独立，checker使用pys
 /*
 还有一个小问题是元素的中间表示是一个ordered data，然而在转义以后，其结果是一个unordered data，然而在转义以后，其结果是一个unordered
 这样的话，function call的list形式的调用可能会发生错误。
+(finish another scheme)
 */
 
 /*
@@ -108,9 +119,9 @@ DictChecker用于在pyson文件中定义
 但是如果没有就需要额外的接口来解析
 
 DictChecker设计完，我就做测试
-tips功能可以以后再添加，这一块比较复杂
+tips功能可以以后再添加，这一块比较复杂(replace wth repr)
 
-现在再明确一下目标，我的主要目标是要做一个字符串传参的范式，对标的主要是json，不应该受到pyparser等的影响，在参数提示支持上不应该受到pyparser的影响
+现在再明确一下目标，我的主要目标是要做一个字符串传参的范式，对标的主要是json，不应该受到pyparser等的影响，在参数提示支持上不应该受到pyparser的影响 (不受到pyperser影响)
 
 现在线头有点多需要重新理顺一下
 
@@ -133,6 +144,8 @@ pyson base解决一个痛点问题，面向对象的超参数表示，这一点�
 整体来讲pyson仍然具有完全不可替代的作用
 pyson和pyparser方法也各有千秋，pyson可以设置极端复杂的和高层次的配置，pyparser则只能设置最简单的配置，同时还有复杂的if else语句的解析成本。
 缺点是pyparser天然带有语法提示，而pyson天然不具备语法提示，只能依赖于之前config文件的提示。在这里我对这个语言进行一个补全条例。
+
+pyson并不面向于服务器配置领域,仅面向于复杂的配置设置和远程对象调用. (finish)
 */
 
 /*
@@ -140,12 +153,13 @@ pyson和pyparser方法也各有千秋，pyson可以设置极端复杂的和高�
 首先由于测试的极端不适，必须增添两个userChecker接口
 然后需要对checker完成测试，然后尽快发布到github上，使用pip发布，并编写document
 后期有以下工作可以做
-1 改善pyson object的访问接口，整合dict和object访问两种方式
-2 考虑将注册checker机制，并和transform一起修改
-3 增添tips级联功能。
-4 在carpo平台上，整合第一个用pyson编写的分类项目
-5 在carpo平台上提供网页可视化支持。
-6 添加打印当前注册函数的接口
+1 改善pyson object的访问接口，整合dict和object访问两种方式 (finish)
+2 考虑将注册checker机制，并和transform一起修改 (finish)
+3 增添tips级联功能。(replace with repr)
+4 在carpo平台上，整合第一个用pyson编写的分类项目 (undo)
+5 在carpo平台上提供网页可视化支持。 (undo)
+6 添加打印当前注册函数的接口 (finish)
+
 */
 
 /*对DictChecker作出更改，首先抽象出BaseDictChecker用作，DictChecker和ParamsChecker的基类
@@ -158,10 +172,12 @@ DictChecker支持OrderedDict和UnOrderedDict, ParamsChecker支持List以及需�
 另外我测试了importlib的调用，importlib的调用完全同步于当前的执行文件，所以具有一定的危险性
 
 最终解决方案是，简化注册函数，同时不使用非包的读取的方式，并添加globals() build in function的支持
+(finish,实际上在python文件中写dict更香)
 */
 
 /*ParamsChecker 有两种实现方案，第一种是需要使用func来构造，第二种不需要function来构造
 第一种的好处是，构造出来的checker可以直接进行regist，同时更加符合逻辑，第二种的好处是，在构造params checker的时候无需再将函数名进行传递。
+(finish)
 */
 
 /*暂不提供变长checker支持*/
@@ -177,10 +193,12 @@ params的设定真的需要OrderedDict吗？
 如果params传入了list，那么list先根据OrderedDict的顺序转换成OrderedDict再进行解析
 需要考虑一个问题，如果用户定义的Dict不符合顺序结构，如果Unlimit为False，且没有默认的参数，就报错
 如果用户定义的Dict不符合顺序结构，同时Unlimit为True，
+(finish)
 */
 
 /*Object Checker如果使用正则表达式的话，语法匹配规则过于复杂，这里我打算使用
 相对简单的语法匹配规则，前缀语法匹配规则，只要begin with即可
+(finish)
 */
 
 /*
@@ -197,7 +215,7 @@ params的设定真的需要OrderedDict吗？
         }
     },
     model:self.prefix.model,
-    lr:self,
+    lr:0.1,
     dataset:self.prefix.dataset
 }
 
@@ -208,14 +226,15 @@ params的设定真的需要OrderedDict吗？
 如果是dictChecker可以直接用dict
 如果是参数checker，由于在注册中加入了排序机制，也可以直接用dict
 综上，所有的内容都可以用dict表示
+(finish)
 */
 
 /*
 考虑一些改进的点
-1 检查content定位机制
-2 检查更加复杂的checker和包含self引用
+1 检查content定位机制(finish)
+2 检查更加复杂的checker和包含self引用(finish)
 3 把pyson_object更改一下，提供更加舒服的访问机制 (完成)
-4 提供更好的报错机制
+4 提供更好的报错机制(finish)
 5 为checker提供级联的print机制 (完成)
 6 filter机制 (完成)
 */
@@ -223,6 +242,7 @@ params的设定真的需要OrderedDict吗？
 /*
 先从简单的开始，更改pyson_object机制
 然后为checker增添级联print
+(finish)
 */
 
 /*
@@ -230,29 +250,37 @@ params的设定真的需要OrderedDict吗？
 */
 
 /*
-优化代码结构 (与content一致，待定，非必须)
+优化代码结构 (与content一致，待定，非必须) (undo)
 */
 
 /*优化content，value不再是content的一个元素，而是content本身
 重点优化的有list,dict和object，
 int str bool float None等如果可以优化最好
+(drop)
 */
 
 /*优化转换流程，先将内容翻译成content，然后transform可以指定翻译内容
-优化checker，checker的dict可以直接通过[]访问子checker
+优化checker，checker的dict可以直接通过[]访问子checker (drop)
 */
 
 /*考虑transfrom的参数传递
 checker可以直接使用string字符串 obj.obj.1来进行引用
+(drop)
 */
 
 /*现在有两种方式，一种是pyson可以预加载，然后执行子模块，
-另外一种则是，pyson不允许预加载，直接全部编译并执行*/
+另外一种则是，pyson不允许预加载，直接全部编译并执行
+(replace with filter)
+*/
 
-/*在这里我选择全部执行的方式，没有理由json可以整体执行，pyson却只能分步，分块执行*/
+/*在这里我选择全部执行的方式，没有理由json可以整体执行，pyson却只能分步，分块执行
+
+(replace with filter)*/
 
 /*content 本身其实并不影响模型的使用
-content 只在中间过程出现，在末尾过程不出现*/
+content 只在中间过程出现，在末尾过程不出现
+(checker structure concern)
+*/
 
 /*
 现在有一个非常复杂的问题
@@ -261,35 +289,61 @@ json等object notation，由于其数据轻亮，这些数据哪怕全部被实�
 然而在pyson中，如果一个pyson对应了多种情况，那么其他情况的对象也要被被迫实例化。
 在这个过程中，会有大量的无效object。然而这些都是必要的，删除任何一个部分都会破坏实例的有效性，除非加入if else 语句
 在这里我不打算增添任何其他的举动来增加语言的复杂性，可能唯一需要增添的是group设定。
+(replace with filter)
 */
 
 /*现在的pyson已经完全可以使用，
 剩下的工作主要是完善测试，以及增加一些设定来使得pyson更加易用。
 是否添加group？ 添加无论如何group都是有用的，哪怕仅仅是单个文件的解析
+(replace with filter)
 */
 
-/*梳理一下报错定位*/
+/*梳理一下报错定位 (finish)*/
 
-/*checker增添__str__函数*/
+/*checker增添__str__函数(finish)*/
 
 /*思考一下怎么嫁接自动化页面渲染*/
 /*我觉得仿佛可以从checker __str__ 入手*/
 /*提供更好的报错机制依然是一个重头戏,首先是报错不宜冗杂，然后是报错必定位,尽量避免无法定位的错误*/
+/*(The origin design)*/
 
 /* 想对于group，更好的设计是filter，在pyson中，filter选中的元素被编译保留，filter未选中的元素被舍弃*/
 /* perfect 的解决方案 */
 /* 在这种情况下，filter对应的checker也需要被剪裁，来适应被剪裁的pyson object的需要 */
 /* 另外一个则是对list元素的处理，被剪裁的内容中包含了list，list经常会不固定长度，那么剪裁起来就相对有困难
 主要的问题是用户可能只有在知道list长度的情况下才能对pyson object进行合理的剪裁，
-然而实际上用户无法在转译pyson_object之前知道list的长度。*/
+然而实际上用户无法在转译pyson_object之前知道list的长度。
+(finish)*/
 
-0
 /*
 剩余代办项
 1）检查content定位机制，提供更准确的定位（已完成）
 2）提供更好的报错机制，简单准确(完成)
 3）优化整体的代码结构(非必须)
-4）做更广泛的功能测试
+4）做更广泛的功能测试(undo)
+5）分析时间瓶颈（已经分析清楚，生成树的过程比较耗时）
+*/
+
+/* 对于content定位机制，需要先明确一下从什么地方开始梳理
+1）首先是pyson语法分析库，这个地方是定位的起点(Pass)
+2）然后是transform报错的地方，这个地方输出content的位置(Pass)
+3）最后一个是checker，checker是check,首先是报错不宜冗杂，然后是报错必定位,尽量避免无法定位的错误*/
+/*(The origin design)*/
+
+/* 想对于group，更好的设计是filter，在pyson中，filter选中的元素被编译保留，filter未选中的元素被舍弃*/
+/* perfect 的解决方案 */
+/* 在这种情况下，filter对应的checker也需要被剪裁，来适应被剪裁的pyson object的需要 */
+/* 另外一个则是对list元素的处理，被剪裁的内容中包含了list，list经常会不固定长度，那么剪裁起来就相对有困难
+主要的问题是用户可能只有在知道list长度的情况下才能对pyson object进行合理的剪裁，
+然而实际上用户无法在转译pyson_object之前知道list的长度。
+(finish)*/
+
+/*
+剩余代办项
+1）检查content定位机制，提供更准确的定位（已完成）
+2）提供更好的报错机制，简单准确(完成)
+3）优化整体的代码结构(非必须)
+4）做更广泛的功能测试(undo)
 5）分析时间瓶颈（已经分析清楚，生成树的过程比较耗时）
 */
 
@@ -358,6 +412,138 @@ Error存在一些问题，一方面我不希望输出太多的Error traceback，
 /*新的checker的代码已经完成*/
 
 /*功能性测试self的语法已经测试完成 */
+
+/*下一步做初步的文件打包*/
+/*创建setup文件，并发布到pypi上*/
+/*统一命名规则*/
+
+/*修复一个修改性问题*/
+/*目前有若干个方案来实现这个问题
+方案一：所有传入function的self参数可以任意读写，其修改都会传递到原有的代码中去，包括dict和list结构
+方案二：所有的terminal可以任意读写，但是dict和list结构不能发生更改
+方案三：terminal和dict和list结构均不可修改
+对于方案一：会存在结构上和数据上的checker不一致问题，优点是代码的灵活性极强，但是更改超出了原有的代码体系，content和data会表现出完全的不一致性，
+dict和list也会表现出完全的不一致性。
+例如check_before是一个list但是checker_after却是一个dict，这一点不应该被允许，如果checker是一个None，或者标定为unlimit则完全没有问题。
+这会让用户感到混淆，比如checker_before检测到了string，但是实际的期望是一个int，那么这不应该被允许。
+checker明明是一个list checker，经过更改以后也是一个list，但是之前是一个dict，那么经过check before，则会出现问题。
+check_before 和checker_after应该以checker_after为准，但是如果list中出现了object，那么cehcker_before必须被调用，但是由于这个list中的元素和之前的元素不一致，那么就会出现失衡.
+另外如果object checker可以适应content checker，那么新的object哪怕不是真正的content checker实例，实例也依然可以骗过object checker。
+所以从机制上来讲，这种方法无法成功。
+方案二：
+dict和list结构不能发生更改，数据可以发生更改，在这种情况下，也同样会出现之前的问题
+方案三：
+dict和list结构不能发生更改，数据类型不能发生更改，但数据值可以发生更改，这种方式可以解决问题，但是在可更改环境中，同样面临了显示数据不一致的问题
+方案四：
+dict和list结构不能发生更改，数据类型和值也不能更改。但是在完全transform过后，这些均可以更改。
+
+现在目标写一个只读的dict和list
+
+突然有个问题，如果在 父未成形时，子节点引入父节点，会怎么样？会造成无限循环递归*/
+
+/*明确今日任务
+1)给基本类型的checker添加非object对象限制(finish)
+2)重新考虑checker的设计，尤其是dict和list(waiting)
+3)考虑子节点引入父节点问题，以及其循环调用问题,这种情况应该被禁止(finish)
+4)编写只读的dict和list结构(finish)
+*/ 
+
+/*有一个小bug一直没有解决掉，就是在语法的后面添加任意文字，语法依然可以被解析 我想需要修复一下这个bug*/
+
+/*The parent could not accessed by the child， 所以我们不用担心子节点会访问到父亲变元
+所以当前的目标就是setting一个只读字典和list*/
+/*我忘记了一个非常重要的项 self 只能在*/
+/* 还有一种情况是:如果checker dict包含了,defualt的选项,那么就会写dict,这样被补全的dict会报错*/
+/*或许深拷贝更符合当前的情况*/
+
+/* 深拷贝不符合要求,最好还是使用报错机制
+1) 如果是非函数调用的self引用,那么无需设置为只读
+2) 如果是函数调用的self引用那么级联设置为只读 */
+
+/* 只读的代码里面可能会包含self自引用,即id为root,
+在这种情况下,当遇到self时,需要将当前位置的内容替换成root_dict
+只读dict和只读list如何初始化?*/
+
+/*考虑下convert read only应该怎么实现?*/
+
+/*考虑self的ReadOnly如何设计*/
+
+/*要不要取消掉self，取消吧*/
+/*主观上我希望self被保留*/
+/*思考一下应该如何设计这个主题*/
+/*如果dict不是read only 那么有一个ctx=None
+如果ctx不为None，则代表属于根的self已经存在，在这种情况下就直接对self进行赋值
+然后再级联disable 所有的dict和list*/
+
+/*已完成readOnly问题*/
+
+/*考虑dict的情况*/
+
+/*
+考虑checker的情况，现在checker可以放心修改原有的数据文件了
+如果出现了冲突性的checker？那么用户应带对这个问题负责任*/
+
+/*明日计划
+1）考虑从用户便利角度重新设计checker部分，尽管在使用上已经非常方便
+但是在可扩展性和语义的理解上也应当提供方便,从用户角度看待checker的可扩展性
+2）做更多的更复杂的测试，增添test文件夹，对大规模checker做测试
+3）编写setup
+*/
+
+/*在定义函数中出现的error应该被定义为 Runtime
+
+/*工作梳理代办项
+1) 统一pyson概念
+2) 修改将dict转换为DictChecker以及Checker检查从transform代码里移除,移至regist(finish)
+3) 重新考虑checker设计是否合理,优化用户扩展性体验
+4) 测试
+5) 性能测试与考虑优化
+5) 发布
+6) 编写carpo平台示例
+*/
+
+/* 首先统一pyson中的几个概念
+当前的字符串叫pyson string
+被解析后的对象叫做pyson object
+内部被调用的注册函数叫做 regist_object 或者 python_object
+检查pyson string的传入对象叫checker
+未被解析的当前内容叫content,未被解析的pyson整体叫做root_content
+被解析的当前内容叫value,被解析的pyson整体叫做root_value
+*/
+
+/*下面将dict转换为DictChecker以及Checker检查从transform代码里移除,移植到regist*/
+
+/*有一个小问题,由于Checker Dict中的 dict是通过参数传递的方式传入到DictChecker中的,所以checker dict天然具有read only的属性*/
+//然而我们要求,所有的参数都是readOnly的
+//所以呢? //Readonly合理吗? //答, 不合理
+//那么更好的方式是DeepCopy
+/*
+pyson deep copy同样有root_id的问题
+*/
+
+/*检查一下输出问题,从道理上来讲应该还有一层的exception可以handle这个问题*/
+
+/*下一个议程,统一pyson中的概念*/
+/*一个一个改名字,没有什么窍门*/
+
+/*我觉得 content和root_content以及value和root_value不能反映这两个量的含义*/
+
+/*换一换名字吧，叫什么呢？ 
+content and root_content transformed_data transfromed_root*/
+/* node output */
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

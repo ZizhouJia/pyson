@@ -1,6 +1,6 @@
 #-*-coding:utf-8 -*-
 import re
-import pyson.pyson.pyson_object as pyson_object
+import pyson.pyson.regist_object as regist_object
 from pyson.error import CheckWrongError
 
 from inspect import isfunction
@@ -51,20 +51,20 @@ class Checker(object):
         self.column=0
         
 
-    def _check_before(self,current_node,raw_dict,location):
-        self.line=current_node.line
-        self.column=current_node.column
+    def _check_before(self,node,node_root,location):
+        self.line=node.line
+        self.column=node.column
         self.location=location
-        self.check_before(current_node,raw_dict)
+        self.check_before(node,node_root)
 
 
-    def _check_after(self,current_node,ctx):
-        self.check_after(current_node,ctx)
+    def _check_after(self,node,output_root):
+        self.check_after(node,output_root)
 
-    def check_before(self,current_node,raw_dict):
+    def check_before(self,node,node_root):
         pass
 
-    def check_after(self,current_node,ctx):
+    def check_after(self,node,output_root):
         pass
     
     def report_error(self,msg):
@@ -106,8 +106,13 @@ class IntChecker(Checker):
         self.max_value=max_value
         self.default=default
         self.allow_none=allow_none
+    
+    def check_before(self,node,node_root):
+        value=node.value
+        if(isinstance(value,regist_object.RegistObject)):
+            self.report_error("The object call is not allowed, just accept the 'int' type value")
 
-    def check_after(self,node,ctx):
+    def check_after(self,node,output_root):
         if(node is None and self.allow_none):
             return
         if(node is None):
@@ -124,8 +129,6 @@ class IntChecker(Checker):
     def tips(self):
         return []
 
-        
-
 class FloatChecker(Checker):
     def __init__(self,min_value=None,max_value=None,default=empty,allow_none=False):
         super(FloatChecker,self).__init__()
@@ -134,19 +137,24 @@ class FloatChecker(Checker):
         self.default=default
         self.allow_none=allow_none
     
-    def check_after(self,node,ctx):
-        if(node is None and self.allow_none):
+    def check_before(self,node,node_root):
+        value=node.value
+        if(isinstance(value,regist_object.RegistObject)):
+            self.report_error("The object call is not allowed, just accept the 'float' type value")
+    
+    def check_after(self,output,output_root):
+        if(output is None and self.allow_none):
             return
-        if(node is None):
+        if(output is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
-        if(not isinstance(node,(int,float))):
-            self.report_error("Input type float is expected but got "+get_type_name(node))
+        if(not isinstance(output,(int,float))):
+            self.report_error("Input type float is expected but got "+get_type_name(output))
         if(self.min_value is not None):
-            if(node<self.min_value):
-                self.report_error("The input value "+str(node)+" is smaller than the min_value "+str(self.min_value))
+            if(output<self.min_value):
+                self.report_error("The input value "+str(output)+" is smaller than the min_value "+str(self.min_value))
         if(self.max_value is not None):
-            if(node>self.max_value):
-                self.report_error("The input value "+str(node)+" is bigger than the max_value "+str(self.min_value))
+            if(output>self.max_value):
+                self.report_error("The input value "+str(output)+" is bigger than the max_value "+str(self.min_value))
 
 class StringChecker(Checker):
     def __init__(self,pattern=None,default=empty,allow_none=False):
@@ -154,15 +162,20 @@ class StringChecker(Checker):
         self.pattern=pattern
         self.default=default
         self.allow_none=allow_none
+    
+    def check_before(self,node,node_root):
+        value=node.value
+        if(isinstance(value,regist_object.RegistObject)):
+            self.report_error("The object call is not allowed, just accept the 'str' type value")
 
-    def check_after(self,node,ctx):
-        if(node is None and self.allow_none):
+    def check_after(self,output,output_root):
+        if(output is None and self.allow_none):
             return
-        if(node is None):
+        if(output is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
-        if(not isinstance(node,str)):
-            self.report_error("Input type str is expected but got "+get_type_name(node))
-        if(self.pattern is not None and re.match(self.pattern,node) is None):
+        if(not isinstance(output,str)):
+            self.report_error("Input type str is expected but got "+get_type_name(output))
+        if(self.pattern is not None and re.match(self.pattern,output) is None):
             self.report_error("The input string should match the regular expression "+self.pattern)
 
 class BoolChecker(Checker):
@@ -171,21 +184,31 @@ class BoolChecker(Checker):
         self.default=default
         self.allow_none=allow_none
     
-    def check_after(self,node,ctx):
-        if(node is None and self.allow_none):
+    def check_before(self,node,node_root):
+        value=node.value
+        if(isinstance(value,regist_object.RegistObject)):
+            self.report_error("The object call is not allowed, just accept the 'bool' type value")
+    
+    def check_after(self,output,output_root):
+        if(output is None and self.allow_none):
             return
-        if(node is None):
+        if(output is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
-        if(not isinstance(node,bool)):
-            self.report_error("Input type 'bool' is expected but got '"+get_type_name(node)+"'")
+        if(not isinstance(output,bool)):
+            self.report_error("Input type 'bool' is expected but got '"+get_type_name(output)+"'")
     
 class NoneChecker(Checker):
     def __init__(self):
         super(NoneChecker,self).__init__()
         pass
 
-    def check_after(self,node,ctx):
-        if(node is not None):
+    def check_before(self,node,node_root):
+        value=node.value
+        if(isinstance(value,regist_object.RegistObject)):
+            self.report_error("The object call is not allowed, just accept the 'None' type value")
+
+    def check_after(self,output,output_root):
+        if(output is not None):
             self.report_error("The input should be None")
 
 class SelfChecker(Checker):
@@ -193,13 +216,13 @@ class SelfChecker(Checker):
         super(SelfChecker,self).__init__()
         self.allow_none=allow_none
 
-    def check_before(self,node,raw_dict):
+    def check_before(self,node,node_root):
         node=node.value
         if(node is None and self.allow_none):
             return
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
-        if(isinstance(node,pyson_object.pyson_object)):
+        if(isinstance(node,regist_object.RegistObject)):
             if(node.object_name!="self"):
                 self.report_error("The input should be self")
         else:
@@ -212,13 +235,13 @@ class ObjectChecker(Checker):
         self.instance=instance
         self.allow_none=allow_none
     
-    def check_before(self,node,raw_dict):
+    def check_before(self,node,node_root):
         node=node.value
         if(node is None and self.allow_none):
             return
         if(node is None):
             self.report_error("The value should not be None, set the allow_none be True for None value")
-        if(not isinstance(node,pyson_object.pyson_object)):
+        if(not isinstance(node,regist_object.RegistObject)):
             self.report_error("Input type 'object' is expected but got '"+get_type_name(node)+"'")
         
         if(node.scope!="name"):
@@ -253,8 +276,7 @@ class BaseDictChecker(Checker):
         self.unlimit=unlimit
         self.allow_none=allow_none
 
-    
-    def check_before(self,node,ctx):
+    def check_before(self,node,node_root):
         element_number=node.element_number
         node=node.value
         if(node is None and self.allow_none):
@@ -284,7 +306,7 @@ class BaseDictChecker(Checker):
                 self.report_error("Key "+str(current_key)+" is required")
             default_value=item_checker.get_default()
             if(not isinstance(default_value,Empty)):
-                node[current_key]=pyson_object.content(type(default_value),default_value,element_number,self.line,self.column)
+                node[current_key]=regist_object.Content(type(default_value),default_value,element_number,self.line,self.column)
                 continue
             self.report_error("Key "+str(current_key)+" is required")
     
@@ -319,6 +341,7 @@ class DictChecker(BaseDictChecker):
         self.checker_dict[key_name]=checker
         if(optional):
             self.optional.append(key_name)
+
 
 class ParamsChecker(BaseDictChecker):
     def __init__(self,checker_list=[],optional=[]):
@@ -356,6 +379,7 @@ class ParamsChecker(BaseDictChecker):
         self.checker_list.append(checker)
         if(optional):
             self.optional_index_store.append(len(self.checker_list)-1)
+    
 
 
 #the list checker for check list
@@ -366,7 +390,7 @@ class ListChecker(Checker):
         self.max_numbers=max_numbers
         self.allow_none=allow_none
     
-    def check_before(self,node,raw_dict):
+    def check_before(self,node,node_root):
         node=node.value
         if(node is None and self.allow_none):
             return
@@ -376,31 +400,31 @@ class ListChecker(Checker):
             self.report_error("Input type 'list' is expected but got '"+get_type_name(node)+"'")
         for i in range(0,len(node)):
             element=node[i]
-            if(not self._check_single_before(element,raw_dict)):
+            if(not self._check_single_before(element,node_root)):
                 print(self.element_checker)
                 self.report_error("The input type doesn't satisify the list type requirement "+str(element.value))
     
-    def check_after(self,node,ctx):
-        for i in range(0,len(node)):
-            element=node[i]
-            if(not self._check_single_after(element,ctx)):
+    def check_after(self,output,output_root):
+        for i in range(0,len(output)):
+            element=output[i]
+            if(not self._check_single_after(element,output_root)):
                 self.report_error("The input type doesn't satisify the list type requirement")
 
     
-    def _check_single_before(self,element,raw_dict):
+    def _check_single_before(self,element,output_root):
         if(self.element_checker is None):
             return True
         try:
-            self.element_checker._check_before(element,raw_dict,self.location)
+            self.element_checker._check_before(element,output_root,self.location)
             return True
         except:
             return False
     
-    def _check_single_after(self,element,ctx):
+    def _check_single_after(self,element,output_root):
         if(self.element_checker is None):
             return True
         try:
-            self.element_checker._check_after(element,ctx)
+            self.element_checker._check_after(element,output_root)
             return True
         except:
             return False
@@ -420,20 +444,20 @@ class EnumChecker(Checker):
             item=enums[i]
             if(item is None):
                 continue
-            if(isinstance(item,(float,int,str,bool,pyson_object.pyson_name))):
+            if(isinstance(item,(float,int,str,bool,regist_object.RegistObjectName))):
                 continue
             raise RuntimeError("Unsupport value in enumeration")
     
-    def _check_pyson_object(self,node):
+    def _check_regist_object(self,node):
         for i in range(0,self.enums):
             item=self.enums[i]
-            if(isinstance(pyson_object.pyson_name)):
+            if(isinstance(regist_object.RegistObjectName)):
                 if(item.pyson_name==node.pyson_name and item.scope==node.scope):
                     return True
         return False
             
     
-    def check_before(self,node,raw_dict):
+    def check_before(self,node,node_root):
         node=node.value
         if(node is None):
             if(node in self.enums):
@@ -445,8 +469,8 @@ class EnumChecker(Checker):
                 return
             else:
                 self.report_error("The value "+str(node)+" not in the enumeration")
-        if(isinstance(node,pyson_object.pyson_object)):
-            if(self._check_pyson_object(node)):
+        if(isinstance(node,regist_object.RegistObject)):
+            if(self._check_regist_object(node)):
                 return
             else:
                 self.report_error("The value "+str(node.scope)+"#"+str(node.pyson_name)+" not in the enumeration")

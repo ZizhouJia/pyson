@@ -1,15 +1,15 @@
-class pyson_object(object):
+class RegistObject(object):
     def __init__(self,object_name,scope=None,params=None):
         self.object_name=object_name
         self.scope=scope
         self.params=params
 
-class pyson_name(object):
+class RegistObjectName(object):
     def __init__(self,object_name,scope=None):
         self.object_name=object_name
         self.scope=scope
 
-class content(object):
+class Content(object):
     def __init__(self,type,value,element_number,line=0,column=0):
         self.type=type
         self.value=value
