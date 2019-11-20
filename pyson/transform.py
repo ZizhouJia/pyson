@@ -166,11 +166,11 @@ class Transformer(object):
         current_list=node.value
         if(checker is not None):
             checker._check_before(node,node_root,location)
-        #get the obj_checker
-        obj_checker=None
-        if(checker is not None):
-            obj_checker=checker.element_checker
         for i in range(0,len(current_list)):
+            #get the obj_checker
+            obj_checker=None
+            if(checker is not None):
+                obj_checker=checker.get_element_checker(i,node)
             #set current location
             current_location=location
             current_location=current_location+"."+str(i)
@@ -229,8 +229,7 @@ class Transformer(object):
             #get the checker
             obj_checker=None
             if(checker is not None):
-                if(key in checker.checker_dict.keys()):
-                    obj_checker=checker.checker_dict[key]
+                obj_checker=checker.get_element_checker(key,node)
             #check the type
             if(isinstance(current_dict[key].value,(int,float,bool,str,type(None)))):
                 if(obj_checker is not None):

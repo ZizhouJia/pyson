@@ -109,8 +109,8 @@ class IntChecker(Checker):
     
     def check_before(self,node,node_root):
         value=node.value
-        if(isinstance(value,regist_object.RegistObject)):
-            self.report_error("The object call is not allowed, just accept the 'int' type value")
+        if(not isinstance(value,int)):
+            self.report_error("Input type 'int' is expected but got '"+get_type_name(value)+"'")
 
     def check_after(self,node,output_root):
         if(node is None and self.allow_none):
@@ -139,8 +139,8 @@ class FloatChecker(Checker):
     
     def check_before(self,node,node_root):
         value=node.value
-        if(isinstance(value,regist_object.RegistObject)):
-            self.report_error("The object call is not allowed, just accept the 'float' type value")
+        if(not isinstance(value,float)):
+            self.report_error("Input type 'float' is expected but got '"+get_type_name(value)+"'")
     
     def check_after(self,output,output_root):
         if(output is None and self.allow_none):
@@ -165,8 +165,8 @@ class StringChecker(Checker):
     
     def check_before(self,node,node_root):
         value=node.value
-        if(isinstance(value,regist_object.RegistObject)):
-            self.report_error("The object call is not allowed, just accept the 'str' type value")
+        if(not isinstance(value,str)):
+            self.report_error("Input type 'str' is expected but got '"+get_type_name(value)+"'")
 
     def check_after(self,output,output_root):
         if(output is None and self.allow_none):
@@ -186,8 +186,8 @@ class BoolChecker(Checker):
     
     def check_before(self,node,node_root):
         value=node.value
-        if(isinstance(value,regist_object.RegistObject)):
-            self.report_error("The object call is not allowed, just accept the 'bool' type value")
+        if(not isinstance(value,bool)):
+            self.report_error("Input type 'bool' is expected but got '"+get_type_name(value)+"'")
     
     def check_after(self,output,output_root):
         if(output is None and self.allow_none):
@@ -204,8 +204,8 @@ class NoneChecker(Checker):
 
     def check_before(self,node,node_root):
         value=node.value
-        if(isinstance(value,regist_object.RegistObject)):
-            self.report_error("The object call is not allowed, just accept the 'None' type value")
+        if(not isinstance(value,type(None))):
+            self.report_error("Input type 'None' is expected but got '"+get_type_name(value)+"'")
 
     def check_after(self,output,output_root):
         if(output is not None):
@@ -327,6 +327,11 @@ class BaseDictChecker(Checker):
         for opt in self.optional:
             if(opt not in dict_list):
                 raise RuntimeError("The "+str(opt)+" doesn't appear in dict key")
+    
+    def get_element_checker(self,key,node):
+        if(key not in self.checker_dict):
+            return None
+        return self.checker_dict[key]
             
 
 class DictChecker(BaseDictChecker):
@@ -429,9 +434,10 @@ class ListChecker(Checker):
         except:
             return False
         
+    def get_element_checker(self,index,node):
+        return self.element_checker
 
-    def get_default(self):
-        return None
+
 
 
 #enum type

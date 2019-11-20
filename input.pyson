@@ -493,7 +493,7 @@ dict和list结构不能发生更改，数据类型和值也不能更改。但是
 /*在定义函数中出现的error应该被定义为 Runtime
 
 /*工作梳理代办项
-1) 统一pyson概念
+1) 统一pyson概念(finish)
 2) 修改将dict转换为DictChecker以及Checker检查从transform代码里移除,移至regist(finish)
 3) 重新考虑checker设计是否合理,优化用户扩展性体验
 4) 测试
@@ -531,6 +531,19 @@ pyson deep copy同样有root_id的问题
 /*换一换名字吧，叫什么呢？ 
 content and root_content transformed_data transfromed_root*/
 /* node output */
+
+/*check_before和checker_after的双设计大致合理*/
+/*terminal的设计大致合理*/
+/*checker dict和checker list的设计合理吗？*/
+
+/*这两项内容和当前的transform高度耦合*/
+
+/*首先pyson_dict和dict中的内容是否一致*/
+/*例如设置了unlimit为True会怎么样?*/
+/*所以现在的问题是pyson_dict耦合性过强，两者的分工并不明确*/
+/*从本质上来transform dict应当仅获取子checker，并将子checker分发给子例程
+list checker 则检测当前元素的check_before并将元素返回给transform函数*/
+
 
 
 
