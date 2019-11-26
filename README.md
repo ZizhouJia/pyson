@@ -38,7 +38,7 @@ print(pyson_object["school"])
 print(pyson_object["student"][0]["name"])
 The data can also be accessed with the dot.
 pyson_object["student"][0]["name"] is as the same as the output.student[0].name
-### Regist Object Type
+### The Regist Object Type
 Different with JSON, The Python object, class and function call can be represented with the PySON. Here we use regist object type to name this representation.
 First we have to regist the object on the pyson register.
 Suppose we have a Student class, defined as :
@@ -53,6 +53,8 @@ class Student(object):
 Then we regist the class:
 import pyson
 pyson.reg.regist_object("Student",Student)
+
+the @reg.regist("Student") decorator can also been used to regist the class and the function 
 
 The PySON object can be like this:
 {
@@ -77,9 +79,10 @@ likes the PySON object before, it can also parsed into the python dict with the 
 import pyson
 pyson_object=pyson.from_file("input.pyson")
 print(pyson_object)
-### The Python package and the buildin function call.  
+### The Module Object Type  
 The PySON object can also call the Python package and the buildin function.  
-Different with the regist object, the python package function and buildin function can directly called with the name.
+Here we use the module object to name this representation.
+Different with the regist object, the moudule object don't have to be registed, the python package and buildin function can directly called with the origin package name and function name.
 {
     array:numpy.Array([1,2,3,4,5]),
     length:len(array)
@@ -87,19 +90,48 @@ Different with the regist object, the python package function and buildin functi
 import pyson
 pyson_object=pyson.from_file("input.pyson")
 print(pyson_object)  
-It may be dangerous for directly calling the python package and the buildin function.
+Sometimes, It may be dangerous for directly calling the python package and the buildin function.
 It can be disabled with following code:  
-pyson.reg.package_load_allow=False
+pyson.reg.package_load_allow=False,  
+the package and buildin function will not been found.
 
-### The self keyword
-The self keyward can also been used for reference the key value before.
+### The Self Keyward Reference
+We can use the self keyward to reference the key which has already defined before.  
+The corresponding value of the key will be copied and assign to the current key which uses the self keyward reference. The actually python object will not been copied, it just store the pointer of the origin python object (shallow copy) and the basic type (int,float,bool,string,dict,list) will be copied recursively (deep copy)
 given the PySON dict:
 {
     students:["Tom","Danny","Neo","Tom"],
     selected_student:self.students.1
 }
-the resut
+the selected_student is "Danny"  
+Anther example show the self keyward reference copy mechanism is here:
+{
+    school_info:{
+        school_name:"Tsinghua",
+        student:@Student{
+            name:'Tom',
+            age:18,
+            height:1.78,
+            male:true,
+            introduction:none,
+            friends:["Harry","Danny","Neo"]
+        }
+    }
+    modified_info:@modify_info{
+        input_dict:self.school_info,
+        school_name:"THU",
+        age:19
+    }
+}
 
+@reg.regist("modify_info")
+def modify_info(input_dict,school_name,age):
+    input_dict["school_name"]=school_name
+    input_dict["student"].age=age
+    return input_dict
+
+print(pyson_object.school_name)
+print(pyson_object.student)
 
 
 
