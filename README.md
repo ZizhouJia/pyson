@@ -7,12 +7,6 @@ PySON is a JSON like object notation for python. Besides the usual use of the JS
 ## Install
 pip install python-pyson
 
-## PySON object format
-PySON is a json like object notation for python. Besides the usual use of the JSON, the python class and function call can be represented with PySON.  
-The PySON is like below:  
-{  
-
-}
 ## Getting Started
 ### Basic Type
 Likes the JSON object, The PySON object is also nested with the dict and the list.  
@@ -83,7 +77,7 @@ likes the PySON object before, it can also parsed into the python dict with the 
 import pyson
 pyson_object=pyson.from_file("input.pyson")
 print(pyson_object)
-### The Python package and the buildin function call.
+### The Python package and the buildin function call.  
 The PySON object can also call the Python package and the buildin function.  
 Different with the regist object, the python package function and buildin function can directly called with the name.
 {
