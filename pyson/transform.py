@@ -305,7 +305,7 @@ class Transformer(object):
                 params={}
                 self._transform_dict(regist_object.params,node_root,params,output_root,location+"#params",obj_class[1],instance)
                 #if the params is wrong throw the exception
-                params=pyson_deep_copy(params,id(params),id(output_root))
+                # params=pyson_deep_copy(params,id(params),id(output_root))
                 obj=None
                 try:
                     obj=obj_class[0](**params)
@@ -318,7 +318,7 @@ class Transformer(object):
                 if(obj_class[1] is None):
                     params_list=[]
                     self._transform_list(regist_object.params,node_root,params_list,output_root,location+"#params",None)
-                    params_list=pyson_deep_copy(params_list,id(params_list),id(output_root))                   
+                    # params_list=pyson_deep_copy(params_list,id(params_list),id(output_root))                 
                     try:
                         obj=obj_class[0](*params_list)
                         output.append(obj)
@@ -346,7 +346,7 @@ class Transformer(object):
                     params_node=pyson.regist_object.Content(dict,new_dict,node.element_number,node.line,node.column)
                     params={}
                     self._transform_dict(params_node,node_root,params,output_root,location+"#params",dict_checker)
-                    params=pyson_deep_copy(params,id(params),id(output_root))
+                    # params=pyson_deep_copy(params,id(params),id(output_root))
                     try:
                         obj=obj_class[0](**params)
                         output.append(obj)
@@ -434,6 +434,8 @@ class Transformer(object):
             raise TransformWrongError("The 'self."+regist_object.object_name+"' is wrong",
                         location,node.line,node.column,reason)
         if(isinstance):
+            if(prev_location!="self"):
+                transformed_data=pyson_deep_copy(transformed_data,id(transformed_data),id(output_root))
             output.append(transformed_data)
 
     def transfrom(self,node,checker=None,dict_filter=[]):

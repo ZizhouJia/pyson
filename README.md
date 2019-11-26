@@ -92,7 +92,13 @@ It can be disabled with following code:
 pyson.reg.package_load_allow=False
 
 ### The self keyword
-The self keyword 
+The self keyward can also been used for reference the key value before.
+given the PySON dict:
+{
+    students:["Tom","Danny","Neo","Tom"],
+    selected_student:self.students.1
+}
+the resut
 
 
 
