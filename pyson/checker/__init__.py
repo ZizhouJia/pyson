@@ -9,12 +9,16 @@ SelfChecker=checker.SelfChecker
 ObjectChecker=checker.ObjectChecker
 DictChecker=checker.DictChecker
 ListChecker=checker.ListChecker
-EnumChecker=checker.EnumChecker
 ParamsChecker=checker.ParamsChecker
+EnumChecker=checker.EnumChecker
+BasicEnumChecker=checker.BasicEnumChecker
+ObjectEnumChecker=checker.ObjectEnumChecker
+
 Empty=checker.Empty
-PysonObjectName=checker.PysonObjectName
+ObjectName=checker.ObjectName
 
 __all__=['IntChecker','FloatChecker',
 'StringChecker','BoolChecker','NoneChecker',
 'SelfChecker','ObjectChecker',
-'DictChecker','ListChecker','EnumChecker','ParamsChecker','Empty','PysonObjectName']
+'DictChecker','ListChecker','ParamsChecker','EnumChecker','BasicEnumChecker','ObjectEnumChecker','Empty','ObjectName']
+

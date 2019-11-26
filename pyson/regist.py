@@ -25,8 +25,8 @@ class Register(object):
         if(object_name not in self._regist_object.keys()):
             raise ReigistError("The "+str(object_name)+" is not been registed")
         func=self.get_object(object_name)[0]
-        checker=self._warp_checker_dict(checker)
-        checker._sort_params_key(func)
+        if(isinstance(checker,c.ParamsChecker)):
+            checker.generate_params_dict(func,object_name)
         self._regist_object[object_name][1]=checker
         
     def get_object(self,object_name):
@@ -57,33 +57,9 @@ class Register(object):
     
     def regist_checker(self,name,checker):
         if(name not in self._regist_pyson_checker):
-            checker=self._warp_checker_dict(checker)
             self._regist_pyson_checker[name]=checker
         else:
             raise ReigistError("The "+str(name)+" has already been registed")
-    
-    def _warp_checker_dict(self,current_checker):
-        if(isinstance(current_checker,dict)):
-            for key in current_checker.keys():
-                current_checker[key]=self._warp_checker_dict(current_checker[key])
-            return c.DictChecker(current_checker)
-        if(isinstance(current_checker,c.DictChecker)):
-            checker_dict=current_checker.checker_dict
-            for key in checker_dict.keys():
-                checker_dict[key]=self._warp_checker_dict(checker_dict[key])
-            return current_checker
-        if(isinstance(current_checker,c.ParamsChecker)):
-            checker_list=current_checker.checker_list
-            for i in range(0,len(checker_list)):
-                checker_list[i]=self._warp_checker_dict(checker_list[i])
-            return current_checker
-        if(isinstance(current_checker,c.checker.Checker)):
-            return current_checker
-        
-        if(current_checker is None):
-            return current_checker
-        
-        raise RuntimeError("The checker format is wrong")
 
         
     def get_checker(self,name):

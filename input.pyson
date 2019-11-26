@@ -206,16 +206,17 @@ params的设定真的需要OrderedDict吗？
 */
 
 {
+   
     prefix:{
         model:@nn.sequential([@nn.conv2d(3,16,3,1),@nn.conv2d(32,64,3,1),@nn.conv2d(64,128,3,1)]),
         lr:0.1,
         dataset:{
             name: "mnist",
-            batch_size:32
+            batch_size:@nn.conv2d(3,16,3,1)
         }
     },
+     lr:0.1,
     model:self.prefix.model,
-    lr:0.1,
     dataset:self.prefix.dataset
 }
 
@@ -226,7 +227,7 @@ params的设定真的需要OrderedDict吗？
 如果是dictChecker可以直接用dict
 如果是参数checker，由于在注册中加入了排序机制，也可以直接用dict
 综上，所有的内容都可以用dict表示
-(finish)
+(finish)(error here)
 */
 
 /*
@@ -495,7 +496,7 @@ dict和list结构不能发生更改，数据类型和值也不能更改。但是
 /*工作梳理代办项
 1) 统一pyson概念(finish)
 2) 修改将dict转换为DictChecker以及Checker检查从transform代码里移除,移至regist(finish)
-3) 重新考虑checker设计是否合理,优化用户扩展性体验
+3) 重新考虑checker设计是否合理,优化用户扩展性体验(finish)
 4) 测试
 5) 性能测试与考虑优化
 5) 发布
@@ -544,24 +545,150 @@ content and root_content transformed_data transfromed_root*/
 /*从本质上来transform dict应当仅获取子checker，并将子checker分发给子例程
 list checker 则检测当前元素的check_before并将元素返回给transform函数*/
 
+/*明日代办项
+1）抽象checker设计(finish)
+2）简化transform代码(finish)
+3）编写测试例程
+4）编写setup，打包成pip
+5）编写document
+6）编写carpo程序示例*/
+
+/*聚焦一下当前的checker,所有的方法需要继承DictChecker或者ParamsChecker
+ParamsChecker非常特殊，只有在根部的时候可以被使用，ParamsChecker只有在根部的时候才可以被使用
+理论上来讲ParamsChecker是一个特殊化的DictChecker*/
+/*Regist 这里调用了function sort也有些特殊。*/
+/*regist 中的_warp_function也相对比较诡异,其中也用到了ParamsChecker，以及DictChecker
+理论上来讲ParamsChecker不应该出现在Warp_function中*/
+/*
+画出DictChecker的构造图：
+BaseDictChecker----DictChecker
+                ----ParamsChecker
+理想的构造图应该是：
+BaseDictChecker---*/
+//DictChecker 和代码整体的耦合性比较强
+//这里面get_element_checker的设计是不错的
+//现在比较高耦合的地方主要是_warp_check_dict，由于子checker的问题，导致在warp的过程中无法知道应当如何warp
+//如果出现了checker_dict被override，那么这个函数会崩掉。
+//如果解析{}出现在transform中，那么transform的代码就会相对比较冗杂。
+//ParamsChecker尽管是BaseDictChecker的特例，但是行为上比较复杂
+//ParamsChecker非常特别
+//{}应该被放在transform
+//ParamsChecker是一个特殊的Checker，规定只能使用在function中
+//DictChecker，只包含了固定的接口，DictChecker是一个实体
+/*
+//Enum 做测试，测试类型,编写list形式的快捷方式//
+//编写simple way mapping
+
+//太舒服了吧，这个工具，我爱上这个工具了
+//{}
+*/
+/*下面要再添加一项功能,一个checker warper,在checker warper中
+任何子对象都可以被翻译成一个checker,从而简化checker的写法
+这里面有两点,第一点是不仅有transform中需要checker warper
+在function的params setting中也需要checker warper
+所以需要考虑checker warper应该如何设计. 两种checker warper表现出来的情况应该是统一的.(finish checker warper已不需要在regist中使用)
+*/
+
+//现在有paramschecker和dictchecker两种,如果传入的内容是paramschecker
+/*现在重新看dict的机制应该有一定的问题存在，我想需要用OrderedDict
+或者在做function call的时候需要传入func来做辅助
+如果用OrderedDict那么输出显示会相对来讲不太美观，其他情况下并没有明显的坏处
+在注册function的过程中需要调用sort_dict_key来让key有序，paramsChecker则需要通过sort_dict_key使得dict_checker被生成*/
+/*ParamsChecker的设计比较迷，也许可以单独提出来，当作一个特别checker门类? */
+
+/*如果放弃OrderedDict那么就需要在function call的时候来sort params
+ParamsChecker作为一个特殊的门类，DictChecker需要提供有序的key generator
+ParamsChecker也需要提供有序的key generator，根据当前传入的function来解析*/
+/*这样的话，checker就不需要在regist阶段来warp*/
+/*ParamsChecker需要在regist阶段解析一下*/
+/*我似乎对设计有一些心急了*/
+/*ParamsChecker门类比较特殊，需要在regist阶段解析，这也可以接受*/
+/*简化访问不能去除，否则会影响到整体的使用*/
+/*目前的一个小问题是，如何把简化访问写的尽可能通用，且简洁*/
+/*DictChecker设计依然堪忧,好难啊*/
+/*我在这里设计语法又绞尽脑汁*/
+/*语法中不应该包含一个特殊的存在，但是sort_params又存在需求*/
+/*sort_dict_checker需要被重新设计，如果存放数据的原始内容不再是checker_dict*/
 
 
+/* 所以最终思路是什么呢? 首先ParamsChecker和DictChecker分别对待,并拥有相同的generate_params_dict(dict,params_sicrt)*/
 
+/*下一步，抽象出warper(finish)*/
 
+/*对Regist Error做错误定位（finish）*/
 
+/*明日计划：
+1）设计Enum
+2）做大规模测试
+3）编写setup
+*/
+/*现在只剩下Enum需要做设计
+Enum可以有多种设计，在这里我给出一个相对广泛的设计类型
+*/
+/*思考一个基本问题，check_after 是否有用？，什么情况可能用到check_after呢？
+首先最基本的类型无法用到check_after，然后考虑obj类型，如果选择限定check after而不是限定check before会造成不安全
+我没有办法想到check after有什么特别的用处，我打算drop这个设定，统一将接口设计为check
+*(这是个脏活，没有什么技巧)*/
+/*检测StringChecker的pattern*/
+/*清理transform中的check after*/
+/*修改makefilter中的历史遗留代码*/
+/*make filtering中需要暴露出checker_dict的内容，那么dictChecker需要提供接口来帮助剪切checker*/
+/*未来计划：
+1）在dictChecker中增添filter接口(完成)
+2）添加Enum并做测试（undo）
+3）编写setup（undo）
+4）考虑更多的改进的地方
+5）还有整体性测试
+*/
 
+/*filter接口存在一个问题
+1）根据需要filter首先需要通过check_warper来生成一个DictChecker
+2）然后DictChecker调用filter接口，返回一个新的DictChecker
+然后新的DictChecker用来进行进一步检测
+那么和generate_params_dict相同，如果DictChecker发生了剧烈变化，那么generate_filted_checker也将失效
+*/
+/*我似乎完成了generate_params_dict的操作*/
 
+/*Enum 设计,Enum应该怎么做设计呢?
 
-
-
-
-
-
-
-
-
-
-
+对于基本类型float int str bool none等,这些都必须是一个一摸一样的实例
+对于一个对象类型,我希望用户的接口能够尽可能的简单,这又回到了之前的一个问题
+对象应该是一个实例呢,还是应该是一个类名呢?
+Enum类型,我希望尽可能简单*/
+/*简单到什么程度呢?最简单的情况是 只要填写类名即可,再复杂一点呢,对于类要有一个基本的修饰.
+*/
+/*或者有特别的类对Enum做修饰*/
+/*EnumChecker包含若干类
+1)EnumChecker,包含基础类型的EnumChecker和ObjectChecker
+2) InstaceEnumChecker 包含Object的的prefix string且必须未instance才能被通过
+实际上我觉得Enum的设定容易让人产生混淆,如果既可以被实例化,又存在不可以被实例化,那么其实这种设定非常奇怪*/
+/*实际上也很少有基本类型和特殊对象类型混淆在一起的情况,在这里我决定将Enum分开设计,分别是EnumChecker和
+ObjectEnumChecker,对于ObjectEnumChecker,object必须完全和Object的名称对应,才能算作是通过*/
+/*我决定支持三种EnumChecker，第一种EnumChecker，支持所有的类型，命名为EnumChecker
+第二种仅支持基本类型，命名为BasicEnumChecker，第三种仅支持Object命名为ObjectEnumChecker*/
+/*Enum是否支持Dict类型和List类型？考虑Dict和List是否需要被支持？
+如果支持那么Enum就可以选择一种类型的Dict，如果是List那么就可以，接受一个List。
+缺点是这种Enum相对复杂，考虑第二点是这种用法虽然扩展了pyson的能力，但是这种用法是否有必要性？
+我的观点是，这种用法不应该被采纳，应该把这种用法加入到一个OneOfChecker中,OneOfChecker我打算把它作为后期工程来实现*/
+/*所以确认Enum仅支持 int float bool str None RegistObject五种类型,并分为三种表示*/
+/*三组不同的EnumChecker已添加，下一步考虑添加形式更加简单的Enums快捷方式*/
+/*
+下一步任务
+1）编写文档
+2）做进一步测试
+3）写carpo的样例
+*/
+/*编写文档，的结构应该如何呢？
+如何用一一种简单的方式，表达出PySON的优良特点和使用
+到了checker，filter以及warper相对好写
+但在PySON的基本概念的使用上相对难以把握
+self的机制相对来讲容易一些，可以在阐述完整个概念以后加入到文档中
+相对难以阐述的是如下若干个概念
+我这里考虑先以JSON的表示切入。
+然后加入注册机制，并表示对象
+然后表示默认库
+表示self引用
+checker中有warper机制，然后还有filter*/
 
 
 

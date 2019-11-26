@@ -103,14 +103,29 @@
             instance:@BoolChecker()
         },["instance"])
     },
+    //BasicEnumChecker
+    {
+        name:"EnumChecker",
+        scheme:@DictChecker({
+            enums:@ListChecker()
+        })
+    },
+    //ObjectEnumChecker
+    {
+        name:"ObjectEnumChecker",
+        scheme:@DictChecker({
+            enums:@ListChecker(),
+            instance:@BoolChecker()
+        },["instance"])
+    },
     //Empty
     {
         name:"Empty",
         scheme:@DictChecker()
     },
-    //PysonObjectName
+    //ObjectName
     {
-        name:"PysonObjectName",
+        name:"ObjectName",
         scheme:@DictChecker({
             object_name:@StringChecker()
         })

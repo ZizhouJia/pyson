@@ -31,10 +31,10 @@ for item in checkers:
 pyson_checker={
     "prefix":DictChecker(unlimit=True),
     "model":ObjectChecker("nn.sequential"),
-    "lr":None,
+    "lr":FloatChecker(),
     "dataset":{
-        "name":StringChecker(),
-        "batch_size":IntChecker()
+        "name":"str",
+        "batch_size":ObjectEnumChecker(["nn.conv2d"],False)
     }
 }
 
