@@ -2,16 +2,16 @@
 A JSON like more powerful notation for python
 
 ## Introduction
-PySON is a JSON like object notation for python. Besides the usual use of the JSON, the python class and the function call can be represented with PySON which can be dynamically parsed into the python object at the running time. The checker is also aviliable for the PySON.
+**PySON** is a JSON like object notation for python. Besides the usual use of the JSON, the python class and the function call can be represented with **PySON** which can be dynamically parsed into the python object at the running time. The checker is also aviliable for the **PySON**.
 
 ## Install
 pip install python-pyson
 
 ## Getting Started
 ### The Basic Type
-Likes the JSON object, The PySON object is also nested with the dict and the list.  
+Likes the JSON object, The **PySON object** is also nested with the dict and the list.  
 The value can be int, float, bool, string four types.
-The PySON object is like following:
+The **PySON object** is like following:
 ```javascript
 //suppose the PySON object saved in the input.pyson file
 {
@@ -30,9 +30,9 @@ The PySON object is like following:
     ]
 }
 ```
-Different with the JSON, the key don't have the " , and composed with the [A-Za-z_] and [0-9].
-Likes the _var1 name_var2 a831239 and so on.  
-The PySON can be parsed into the dict in python
+Different with the JSON, the key don't have the **"** , and composed with the **[A-Za-z_]** and **[0-9]**.
+Likes the **_var1** **name_var2** **a831239** and so on.  
+The **PySON** can be parsed into the dict in python
 likes following:
 ```python
 import pyson
@@ -49,7 +49,7 @@ is as the same as the
 output.student[0].name 
 ```
 ### The Regist Object Type
-Different with JSON, The Python object, class and function call can be represented with the PySON. Here we use regist object type to name this representation.
+Different with JSON, The Python object, class and function call can be represented with the PySON. Here we use **regist object** type to name this representation.
 First we have to regist the object on the pyson register.
 Suppose we have a Student class, defined as :
 ```python
@@ -68,9 +68,13 @@ import pyson
 pyson.reg.regist_object("Student",Student)
 ```
 
-the @reg.regist("Student") decorator can also been used to regist the class and the function 
-
-The PySON object can be like this:
+the **reg.regist** decorator can also been used to regist the class and the function
+```python
+@reg.regist("Student")
+class Student(object):
+    ...
+```
+The **PySON object** can be like this:
 ```javascript
 {
     school:"Tsinghua",
@@ -88,21 +92,21 @@ The PySON object can be like this:
     ]
 }
 ```
-The regist object in pyson begin with '@' following the regist object name. The parameters can be represented with a dict. The key is the parameter name and the value is the actual value we pass into the callee function.
+The **regist object** in pyson begin with **'@'** following the regist object name. The parameters can be represented with a dict. The key is the parameter name and the value is the actual value we pass into the callee function.
 The param name can also be ignored, the object 'Student' can be written as the following:
 ```javascript
 @Student('Tom',18,1.78,true,none,["Harry","Danny","Neo"])
 ```
-likes the PySON object before, it can also parsed into the python dict with the from_file method
+likes the **PySON object** before, it can also parsed into the python dict with the **pyson.from_file** method
 ```python
 import pyson
 pyson_object=pyson.from_file("input.pyson")
 print(pyson_object)
 ```
 ### The Module Object Type  
-The PySON object can also call the Python package and the buildin function.  
-Here we use the module object to name this representation.
-Different with the regist object, the moudule object don't have to be registed, the python package and buildin function can directly called with the origin package name and function name.
+The **PySON object** can also call the Python package and the buildin function.  
+Here we use the **module object** to name this representation.
+Different with the **regist object**, the **moudule object** don't have to be registed, the python package and buildin function can directly called with the origin package name and function name.
 ```javascript
 {
     array:numpy.Array([1,2,3,4,5]),
@@ -115,13 +119,15 @@ pyson_object=pyson.from_file("input.pyson")
 print(pyson_object)
 ```
 Sometimes, It may be dangerous for directly calling the python package and the buildin function.
-It can be disabled with following code:  
-pyson.reg.package_load_allow=False,  
+It can be disabled with following code:
+```python
+pyson.reg.package_load_allow=False
+```
 the package and buildin function will not been found.
 
 ### The Self Keyward Reference
-We can use the self keyward to reference the key which has already defined before.  
-The corresponding value of the key will be copied and assign to the current key which uses the self keyward reference. The actually python object will not been copied, it just store the pointer of the origin python object (shallow copy) and the basic type (int,float,bool,string,dict,list) will be copied recursively (deep copy)
+We can use the **self** keyward to reference the key which has already defined before.  
+The corresponding value of the key will be copied and assign to the current key which uses the self keyward reference. The actually python object will not been copied, it just store the pointer of the origin python object **(shallow copy)** and the basic type **(int,float,bool,string,dict,list)** will be copied recursively **(deep copy)**
 given the PySON dict:
 ```javascript
 {
@@ -162,7 +168,7 @@ print(pyson_object.school_name)
 print(pyson_object.student)
 ```
 ### Checker
-The PySON privide the checker to check the PySON object structure, data type and the value.  
+The PySON privide the checker to check the **PySON object** structure, data type and the value.  
 It's function is vary like the XML scheme, but much easy to write.   
 #### Write A Checker For PySON Object
 given a PySON object:  
@@ -202,12 +208,16 @@ checker={
     }  
 }  
 ```
-The checker need to be registed:  
-pyson.reg.regist_checker(checker,"school_info")  
+The checker need to be registed:
+```python
+pyson.reg.regist_checker(checker,"school_info")
+```
 Using the checker, set the checker name at the parsing time
+```python
 pyson_object=pyson.from_file("input.pyson","school_info")
+```
 #### Create A Checker With PySON
-The PySON checker can also directly be represented with a PySON obejct
+The **PySON checker** can also directly be represented with a **PySON obejct**
 ```javascript
 //Suppose the PySON object stores in the checker.pyson
 {
@@ -232,8 +242,8 @@ pyson.reg.regist_checker(checker,"school_info")
 pyson_object=pyson.from_file("input.pyson","school_info")
 ```
 #### Write Checker with simple way
-Some basic checkers have the simple way to represent if they just use the defualt parameters.  
-the checker cen be writen like this:
+Some **basic checkers** have the simple way to represent if they just use the defualt parameters.  
+the **checker** cen be writen like this:
 ```python
 #main.py
 from pyson.checker import *
@@ -252,12 +262,13 @@ checker={
     }
 }
 ```
-The IntChecker, FloatChecker, BoolChecker, StringChecker can be represented with int, float, bool, string.  
-The EnumChecker can be represented with a list containing the value.  
+The **IntChecker**, **FloatChecker**, **BoolChecker**, **StringChecker** can be represented with "int", "float", "bool", "string".  
+The **EnumChecker** can be represented with a list containing the value.  
 Actually the simple representation will be replaced by the corresponding checker at runtime.  
-The replacement is done by the checker warper, You can design your own warper for the checker. For more detail, see the advanced usage for checker.  
+The replacement is done by the **checker warper**, You can design your own warper for the **checker**. For more detail, see the advanced usage for **checker**.  
 #### The Checker Of Parameters
-The regist function parameters can also have checkers
+The **regist function** parameters can also have checkers
+
 ### Filter 
 
 
