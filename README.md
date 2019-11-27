@@ -12,6 +12,7 @@ pip install python-pyson
 Likes the JSON object, The PySON object is also nested with the dict and the list.  
 The value can be int, float, bool, string four types.
 The PySON object is like following:
+```javascript
 //suppose the PySON object saved in the input.pyson file
 {
     school:"Tsinghua",
@@ -28,20 +29,24 @@ The PySON object is like following:
         }
     ]
 }
+```
 Different with the JSON, the key don't have the " , and composed with the [A-Za-z_] and [0-9].
 Likes the _var1 name_var2 a831239 and so on.  
 The PySON can be parsed into the dict in python
 likes following:
+```python
 import pyson
 pyson_object=pyson.from_file("input.pyson")
 print(pyson_object["school"])
 print(pyson_object["student"][0]["name"])
+```
 The data can also be accessed with the dot.
 pyson_object["student"][0]["name"] is as the same as the output.student[0].name
 ### The Regist Object Type
 Different with JSON, The Python object, class and function call can be represented with the PySON. Here we use regist object type to name this representation.
 First we have to regist the object on the pyson register.
 Suppose we have a Student class, defined as :
+```python
 class Student(object):
     def __init__(self,name,age,height,male,introduction,friends):
         self.name=name
@@ -50,9 +55,12 @@ class Student(object):
         self.male=male
         self.introduction=introduction
         self.friends=friends
+```
 Then we regist the class:
+```python
 import pyson
 pyson.reg.regist_object("Student",Student)
+```
 
 the @reg.regist("Student") decorator can also been used to regist the class and the function 
 
