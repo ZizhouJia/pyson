@@ -293,7 +293,7 @@ pyson.reg.set_params_checker("Student",checker)
 Before parsing the **regist object**, the checker will be used to check the parameters.  
 Another way to set the **checker** for the **regist object** is to use the **ParamsChecker**, seeing the document for more details.  
 #### More About Checkers
-For more complex checking conditions, seeing the document for more details. Or seeing the advantage usage of the pyson to create your own checker. 
+For more complex checking conditions, seeing the document for more details or creating your own checker. Seeing the advantage usage for creating your own checker.
 
 
 
