@@ -41,7 +41,7 @@ print(pyson_object["school"])
 print(pyson_object["student"][0]["name"])
 ```
 The data can also be accessed with the dot.
-pyson_object["student"][0]["name"] is as the same as the output.student[0].name
+```python pyson_object["student"][0]["name"] ``` is as the same as the ```python output.student[0].name ```
 ### The Regist Object Type
 Different with JSON, The Python object, class and function call can be represented with the PySON. Here we use regist object type to name this representation.
 First we have to regist the object on the pyson register.
