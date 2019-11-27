@@ -267,9 +267,33 @@ The **EnumChecker** can be represented with a list containing the value.
 Actually the simple representation will be replaced by the corresponding checker at runtime.  
 The replacement is done by the **checker warper**, You can design your own warper for the **checker**. For more detail, see the advanced usage for **checker**.  
 #### The Checker Of Parameters
-The **regist function** parameters can also have checkers
-
-### Filter 
+The **regist object** parameters can also have checkers
+give the class student:
+```python
+@pyson.reg.regist("Student")
+class Student(object):
+    __init__(self,name,age,height,male,introduction,friends):
+        ...
+```
+The **checker** can be defined as a dict:
+```python
+checker={
+    "name":StringChecker(),
+    "age": IntChecker(),
+    "height":FloatChecker(),
+    "male":BoolChecker(),
+    "introduction":StringChecker(allow_none=True),
+    "friends":ListChecker(StringChecker())
+}
+```
+Then use the **set_params_checker** to set the checker for the Student **regist object**:
+```python
+pyson.reg.set_params_checker("Student",checker)
+```
+Before parsing the **regist object**, the checker will be used to check the parameters.  
+Another way to set the **checker** for the **regist object** is to use the **ParamsChecker**, seeing the document for more details.  
+#### More About Checkers
+For more complex checking conditions, seeing the document for more details. Or seeing the advantage usage of the pyson to create your own checker. 
 
 
 
