@@ -8,7 +8,7 @@ PySON is a JSON like object notation for python. Besides the usual use of the JS
 pip install python-pyson
 
 ## Getting Started
-### Basic Type
+### The Basic Type
 Likes the JSON object, The PySON object is also nested with the dict and the list.  
 The value can be int, float, bool, string four types.
 The PySON object is like following:
@@ -133,6 +133,94 @@ def modify_info(input_dict,school_name,age):
 print(pyson_object.school_name)
 print(pyson_object.student)
 
+### Checker
+The PySON privide the checker to check the PySON object structure, data type and the value.  
+It's function is vary like the XML scheme, but much easy to write.   
+#### Write A Checker For PySON Object
+given a PySON object:  
+{  
+    school:"Tsinghua",  
+    city:"Beijing",  
+    student:  
+    {  
+        name:'Tom',  
+        age:18,  
+        height:1.78,  
+        male:true,
+        grade:"1"  
+        introduction:none,  
+        friends:["Harry","Danny","Neo"]  
+    }  
+}  
+The PySON checker can be write like this:
+//main.py
+import pyson
+from pyson.checker import *
+checker={  
+    "school":StringChecker(),  
+    "city":StringChecker(),  
+    "student":  
+    {  
+        "name":StringChecker(),  
+        "age":IntChecker(),  
+        "height":FloatChecker(),  
+        "male":BoolChecker(),  
+        "grade":EnumChecker(["1","2","3","4"]),
+        "introduction":StringChecker(allow_none=True),
+        "friends":ListChecker(StringChecker())  
+    }  
+}  
+The checker need to be registed:  
+pyson.reg.regist_checker(checker,"school_info")  
+Using the checker, set the checker name at the parsing time
+pyson_object=pyson.from_file("input.pyson","school_info")
+#### Create A Checker With PySON
+The PySON checker can also directly be represented with a PySON obejct
+//Suppose the PySON object stores in the checker.pyson
+{
+    school:@StringChecker(),
+    city:@IntChecker(),
+    student:{
+        name:@StringChecker(),
+        age:@IntChecker(),
+        hegiht:@FloatChecker(),
+        male:@BoolChecker(),
+        grade:@EnumChecker(["1","2","3","3"]),
+        introduction:@StringChecker{allow_none:False},
+        friends:@ListChecker(@StringChecker())
+    }
+}
+//main.py   
+import pyson
+checker=pyson.from_file("checker.pyson")
+pyson.reg.regist_checker(checker,"school_info")
+pyson_object=pyson.from_file("input.pyson","school_info")
+#### Write Checker with simple way
+Some basic checkers have the simple way to represent if they just use the defualt parameters.  
+the checker cen be writen like this:  
+import pyson
+from pyson.checker import *
+checker={  
+    "school":"string",  
+    "city":"string",  
+    "student":  
+    {  
+        "name":"string",  
+        "age":"int",  
+        "height":"float",  
+        "male":"bool",  
+        "grade":["1","2","3","4"],
+        "introduction":StringChecker(allow_none=True),
+        "friends":ListChecker(StringChecker())  
+    }  
+}  
+The IntChecker, FloatChecker, BoolChecker, StringChecker can be represented with int, float, bool, string.  
+The EnumChecker can be represented with a list containing the value.  
+Actually the simple representation will be replaced by the corresponding checker at runtime.  
+The replacement is done by the checker warper, You can design your own warper for the checker. For more detail, see the advanced usage for checker.  
+#### The Checker Of Parameters
+The regist function parameters can also have checkers
+### Filter 
 
 
 

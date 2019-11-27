@@ -91,7 +91,7 @@ def default_warp_function(checker):
             return c.FloatChecker()
         if(checker=="bool"):
             return c.BoolChecker()
-        if(checker=="str"):
+        if(checker=="string"):
             return c.StringChecker()
         if(checker=="self"):
             return c.SelfChecker()

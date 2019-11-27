@@ -705,6 +705,25 @@ checker中有warper机制，然后还有filter*/
 3) self本身也可用于传递,非值传递
 */
 
+/*Checker也需要做一定的规划，有若干部分内容
+1）checker有全写形式
+2）checker有简写形式
+3）checker有pyson形式
+4）checker有warper函数
+5）checker有多种类
+6）checker可以自己实现
+7）checker分为pyson object checker和params checker
+在这里，我把checker分为若干个部分阐述
+1）checker的简写形式
+2）checker的更简写形式
+3）params checker
+3）使用更复杂的形式请参阅checker文档
+checker的高级用法：
+1）使用pyson书写checker
+2）checker warper
+3）implement your own checker
+在高级用法一栏,还有filter的使用*/
+
 
 
 

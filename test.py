@@ -33,7 +33,7 @@ pyson_checker={
     "model":ObjectChecker("nn.sequential"),
     "lr":FloatChecker(),
     "dataset":{
-        "name":"str",
+        "name":"string",
         "batch_size":ObjectEnumChecker(["nn.conv2d"],False)
     }
 }
