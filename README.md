@@ -31,7 +31,7 @@ The **PySON object** is like following:
 }
 ```
 Different with the JSON, the key don't have the **"** , and composed with the **[A-Za-z_]** and **[0-9]**.
-Likes the **_var1** **name_var2** **a831239** and so on.  
+Likes the **_var1**, **name_var2**, **a831239** and so on.  
 The **PySON** can be parsed into the dict in python
 likes following:
 ```python
@@ -127,7 +127,7 @@ the package and buildin function will not been found.
 
 ### The Self Keyward Reference
 We can use the **self** keyward to reference the key which has already defined before.  
-The corresponding value of the key will be copied and assign to the current key which uses the self keyward reference. The actually python object will not been copied, it just store the pointer of the origin python object **(shallow copy)** and the basic type **(int,float,bool,string,dict,list)** will be copied recursively **(deep copy)**
+The corresponding value of the key will be copied and assign to the current key which uses the self keyward reference. The actually python object will not been copied, it just store the pointer of the origin python object **(shallow copy)** and the basic type **(int, float, bool, string, dict, list)** will be copied recursively **(deep copy)**
 given the PySON dict:
 ```javascript
 {
