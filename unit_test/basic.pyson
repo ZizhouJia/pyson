@@ -1,0 +1,61 @@
+{
+    //test the basic type
+    //type int
+    type_int_1:100,
+    type_int_2:-10086,
+    type_int_3:000,
+    //type float
+    type_float_1:1.12e-1000,
+    type_float_2:1.12e1000,
+    type_float_3:-1E100,
+    type_float_4:1E-10,
+    type_float_5:0.12,
+    type_float_6:-00.123,
+    //type bool
+    type_bool_1:True,
+    type_bool_2:False,
+    type_bool_3:true,
+    type_bool_4:false,
+    //type string
+    type_string_1:"",
+    type_string_2:'',
+    type_string_3:"''",
+    type_string_4:'""',
+    type_string_5:'\"\n\t\\ /* */',
+    //type None
+    type_none_1:None,
+    type_none_2:none,
+    //type module object
+    type_module_1: os,
+    type_module_2:os.path,
+    type_module_3:os.path.exists,
+    type_module_4:os.path.exists("path.txt"),
+    //type build in
+    type_buildin_1:len([1,2,3,4]),
+    type_buildin_2:type("string"),
+    //type regist object
+    //type self
+    type_self_1:self.type_bool_1,
+    type_self_2:self.type_module_1,
+    //dict and list and basic type
+    type_dict_1:{
+        key1:'123',
+        //key2:none,
+        key3:{},
+        key4:[],
+        key5:{key5_1:[{},{key5_1_1:1,key5_1_2:[]}]},
+        key6:[{key6_1:[],key6_2:{}},{},[1,2,3,4,5]]
+    },
+    type_dict_2:[[],[[]],[{key_1_1:[]}],{}],
+    //self using
+    self_dict:{
+        key1:self,
+        key2:self.type_module_1,
+        key3:{
+            key3_1:self,
+            key3_2:self.self_dict.key1,
+            key3_3:[self.self_dict.key2]
+        }
+    },
+    self_dict_2:[self.self_dict.key3.key3_1,self.self_dict.key3]
+}

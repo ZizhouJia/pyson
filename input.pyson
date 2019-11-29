@@ -724,6 +724,44 @@ checker的高级用法：
 3）implement your own checker
 在高级用法一栏,还有filter的使用*/
 
+/*下一步
+1)考察其他项目的各种用法的行文布局
+2)编写setup.py并发布 python
+3)编写pyson文档
+*/
 
+/*未来规划
+1)完善文档
+2)编写高自由度的example
+3)整合进carpo平台
+*/
 
+/*编写test测试*/
+
+/*unit test的设计相对来讲比较复杂
+需要做一定的分门别类*/
+/*
+pyson中的功能有如下:
+1)pyson的基本类型转义 int float string bool None
+2)dict和list的嵌套使用
+3)两种注释
+4)Module object转义(库函数和buildin函数)
+5)Regist object转义(class 转义和function 转义)
+6)self关键词使用(self单独使用,self.name使用,嵌套使用)
+checker中的功能如下:
+1)checker的基本类型的各种情况
+(int,float,string,bool,none,object,enum)
+2)checker的list和dict的, 不同的参数和不同的调用方式
+3)checker for params
+4)添加self使用
+高级用法如下:
+1)filter机制
+2)set warper机制
+*/
+
+/*需要对index item函数作出修复*/
+/*修复包含以下两个方面
+1）结构性修复
+2）bug修复
+*/
 

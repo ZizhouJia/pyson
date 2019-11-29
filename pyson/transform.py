@@ -272,7 +272,7 @@ class Transformer(object):
                     output[key]=store
                     self._transform_list(current_dict[key],node_root,store,output_root,current_location,obj_checker,instance)
                 else:
-                    self._transform_list(current_dict[key],node_root,[output[key]],current_location,obj_checker,instance)
+                    self._transform_list(current_dict[key],node_root,[output[key]],output_root,current_location,obj_checker,instance)
                 continue
             if(isinstance(current_dict[key].value,dict)):
                 if(instance):
@@ -377,10 +377,16 @@ class Transformer(object):
         if(isinstance(obj,dict)):
             self._transform_dict(node,node_root,output,output_root,location,checker,False)
             return
+        print(obj)
+        print(location)
         raise RuntimeError("No possible condition")
 
 
-    def _index_item(self,index_string,node_root,output_root):
+    def _index_item(self,node,node_root,output_root,location=""):
+        regist_object=node.value
+        if(regist_object.params is not None):
+            raise TransformWrongError("The self object can not be called",location,node.line,node.column)
+        index_string=regist_object.object_name
         if(index_string==""):
             return output_root,node_root,"self"
         indexs=index_string.split(".")
@@ -388,11 +394,15 @@ class Transformer(object):
         for index in indexs:
             if(intable(index)):
                 if(isinstance(current_indexing,list)):
+                    if(int(index)<0 or int(index)>=len(current_indexing)):
+                        return None
                     current_indexing=current_indexing[int(index)]
                 else:
                     return None
             else:
                 if(isinstance(current_indexing,dict)):
+                    if(index not in current_indexing.keys()):
+                        return None
                     current_indexing=current_indexing[index]
                 else:
                     return None
@@ -406,17 +416,15 @@ class Transformer(object):
             else:
                 current_indexing=current_indexing.value[index]
         raw_data=current_indexing
-        if(isinstance(raw_data,pyson.regist_object.RegistObject) and raw_data.scope=="self"):
-            return self._index_item(raw_data.pyson_name,node_root,output_root)
+        if(isinstance(raw_data.value,pyson.regist_object.RegistObject) and raw_data.value.scope=="self"):
+            return self._index_item(raw_data,node_root,output_root,"self."+index_string)
         else:
             return transformed_data,raw_data,"self."+index_string
   
   
     def _transform_self(self,node,node_root,output,output_root,location="",checker=None,instance=True):
         regist_object=node.value
-        if(regist_object.params is not None):
-            raise TransformWrongError("The self object can not be called",location,node.line,node.column)
-        result=self._index_item(regist_object.object_name,node_root,output_root)
+        result=self._index_item(node,node_root,output_root)
         if(result is None):
             raise TransformWrongError("Can not find the self."+regist_object.object_name,location,node.line,node.column)
         transformed_data,raw_data,prev_location=result
@@ -430,6 +438,7 @@ class Transformer(object):
         except Exception as e:
             error_accure=True
             reason=str(e)
+            raise e
         if(error_accure):
             raise TransformWrongError("The 'self."+regist_object.object_name+"' is wrong",
                         location,node.line,node.column,reason)
