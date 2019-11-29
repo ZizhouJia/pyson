@@ -3,18 +3,15 @@ A JSON like more powerful notation for python
 
 ## Introduction
 **PySON** is a JSON like object notation for python. Besides the usual use of the JSON, the python class and the function call can be represented with **PySON** which can be dynamically parsed into the python object at the running time. The checker is also aviliable for the **PySON**.
-
 ## Requirement
 Python>=3.6  
 antlr4-python3-runtime>=4.7  
-
 ## Install
 ```bash
 git clone http://github.com/Zizhoujia/pyson  
 cd pyson  
 python setup.py install
 ```
-
 ## Getting Started
 ### The Basic Type
 Likes the JSON object, The **PySON object** is also nested with the dict and the list.  
