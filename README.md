@@ -6,12 +6,14 @@ A JSON like more powerful notation for python
 
 ## Requirement
 Python>=3.6  
-antlr4-python3-runtime  
+antlr4-python3-runtime>=4.7  
 
 ## Install
+```bash
 git clone http://github.com/Zizhoujia/pyson  
 cd pyson  
 python setup.py install
+```
 
 ## Getting Started
 ### The Basic Type
